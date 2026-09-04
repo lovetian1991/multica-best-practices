@@ -1,8 +1,8 @@
 # Skills 索引（zh_CN）
 
-本目录收录可直接挂载到 [Multica](https://github.com/multica-ai/multica) 的共享 Skill。每个子目录即一个 Skill，`SKILL.md` 是给 Agent 读的技能说明；带脚本的 Skill 另附 `README.md` 给出人类视角的快速上手。
+本目录收录可直接挂载到 [Multica](https://github.com/multica-ai/multica) 的共享 Skill。每个子目录即一个 Skill，`SKILL.md` 是给 智能体 读的技能说明；带脚本的 Skill 另附 `README.md` 给出人类视角的快速上手。
 
-## 一、平台层（Platform，含公司基建 URL / 凭据的占位外壳）
+## 一、平台层（含公司基建 URL / 凭据的占位外壳）
 
 | Skill | 用途 | 主要入口 |
 |---|---|---|
@@ -12,7 +12,7 @@
 
 > 平台层只放"公司专属 URL / 凭据"的占位外壳，不含任何真实地址。使用方在 `.env` 填自己的 `JENKINS_URL` / `JIRA_URL` / `CONFLUENCE_URL` 等即可。
 
-## 二、编排层（Orchestration，调用平台层把产物落地到团队平台）
+## 二、编排层（调用平台层把产物落地到团队平台）
 
 | Skill | 用途 | 主要入口 |
 |---|---|---|
@@ -25,7 +25,7 @@
 
 ## 三、通用方法论 / 角色 / 评审（纯 Markdown，无脚本）
 
-| Skill | 用途 |
+| 技能 | 用途 |
 |---|---|
 | `multica-implementation` | 实现阶段方法论 |
 | `multica-requirement-analysis` | 需求分析 |

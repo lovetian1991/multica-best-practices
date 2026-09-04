@@ -1,6 +1,6 @@
 # 协作产物约定
 
-> 目的：多 Agent 协作时，下游必须能**稳定地找到上游产物**。本文规定每类产物的「内容规范」与「对接 skill」——**产物落在哪个平台、怎么传 / 取，全部交给 skill，不写进角色提示词**。这样换公司（平台不同）只换 skill，不动任何 agent。
+> 目的：多 智能体 协作时，下游必须能**稳定地找到上游产物**。本文规定每类产物的「内容规范」与「对接 skill」——**产物落在哪个平台、怎么传 / 取，全部交给 skill，不写进角色提示词**。这样换公司（平台不同）只换 skill，不动任何 agent。
 
 ## 1. 核心原则：内容归角色，平台归 skill
 
@@ -26,11 +26,11 @@
 
 这样：公开仓库只放内容层 + 编排层 + 平台层**占位壳**；团队接入自己内网时，只填平台层壳子里的 `config.yaml` 与 `scripts/`，上层零改动。
 
-### 标准用法（PM / Architect 双 skill 句式）
+### 标准用法（产品经理 / 技术架构师双 skill 句式）
 
-- **@ProductManager**：先用 `multica-requirement-analysis` 把 Issue 结构化为带编号的 PRD 内容，再用 `multica-artifact-req-sync` 编排落地（内部调用平台层）。
-- **@Architect**：先用 `multica-technical-design` 写本地设计文档，再用 `multica-artifact-design-sync` 发布（内部调用平台层）。
-- **@Tester**：先用 `multica-test-design` 产出用例内容，再用 `multica-artifact-test-sync` 落地；T3 自动化用 `multica-test-automation`。
+- **@产品经理**：先用 `multica-requirement-analysis` 把 Issue 结构化为带编号的 PRD 内容，再用 `multica-artifact-req-sync` 编排落地（内部调用平台层）。
+- **@技术架构师**：先用 `multica-technical-design` 写本地设计文档，再用 `multica-artifact-design-sync` 发布（内部调用平台层）。
+- **@测试专家**：先用 `multica-test-design` 产出用例内容，再用 `multica-artifact-test-sync` 落地；T3 自动化用 `multica-test-automation`。
 
 「分析 / 设计」类 skill 负责**内容**，「artifact-sync」类 skill 负责**落地与回传引用**——两者分离，内容可复用、平台可替换。
 
@@ -38,12 +38,12 @@
 
 | 产物 | 责任人 | 内容规范（角色侧） | 对接 skill（平台侧，可替换） |
 | --- | --- | --- | --- |
-| UI 设计 | @Designer | 页面结构、状态、交互、标注（对齐 PRD 信息架构） | `multica-artifact-ui-sync`（默认 Figma） |
-| 产品需求 PRD | @ProductManager | G-/FR-/BR-/AC-/KPI-/RISK-/OP- 编号化需求 | `multica-artifact-req-sync`（默认 Wiki 平台） |
-| 开发设计文档 | @Architect | 当前架构、最小改动、受影响组件、实现步骤、风险 | `multica-artifact-design-sync`（默认 Git 仓库 / Wiki 平台） |
-| API 接口文档 | @BackendDev | 端点、入参 / 出参、错误码、鉴权、BR- 对应 | `multica-artifact-api-sync`（默认 API 工具） |
-| 测试用例 / 报告 | @Tester | 功能 / 接口用例、覆盖 AC-、测试报告 | `multica-artifact-test-sync`（默认 用例平台） |
-| CI/CD 部署 | @DevOps | 构建 / 部署记录、环境 URL、日志摘要 | `multica-artifact-cicd-sync`（默认 CI 系统） |
+| UI 设计 | @UI/UE设计师 | 页面结构、状态、交互、标注（对齐 PRD 信息架构） | `multica-artifact-ui-sync`（默认 Figma） |
+| 产品需求 PRD | @产品经理 | 按功能命名为 `prd-<功能名称>.md`，包含 G-/FR-/BR-/AC-/KPI-/RISK-/OP- 编号化需求 | `multica-artifact-req-sync`（默认 Wiki 平台） |
+| 开发设计文档 | @技术架构师 | 当前架构、最小改动、受影响组件、实现步骤、风险 | `multica-artifact-design-sync`（默认 Git 仓库 / Wiki 平台） |
+| API 接口文档 | @后台开发专家 | 端点、入参 / 出参、错误码、鉴权、BR- 对应 | `multica-artifact-api-sync`（默认 API 工具） |
+| 测试用例 / 报告 | @测试专家 | 功能 / 接口用例、覆盖 AC-、测试报告 | `multica-artifact-test-sync`（默认 用例平台） |
+| CI/CD 部署 | @部署运维专家 | 构建 / 部署记录、环境 URL、日志摘要 | `multica-artifact-cicd-sync`（默认 CI 系统） |
 
 > 实现类产物（代码）在真实代码仓库，其变更文件列表写进对应阶段产物文件，由下游与门禁核对。
 
@@ -52,7 +52,7 @@
 每个角色的「我产出什么」段落只写：
 
 ```text
-产出 <产物名>，用 `multica-artifact-<xxx>-sync` skill 落地到团队约定平台，并回传稳定链接给 Leader。
+产出 <产物名>，用 `multica-artifact-<xxx>-sync` skill 落地到团队约定平台，并回传稳定链接给对应小队负责人。
 内容规范见本文第 2 表 / 对应角色指令。
 ```
 
@@ -60,7 +60,7 @@
 
 ## 4. 下游引用的硬规则
 
-1. 上游完成后，由 skill 回传**稳定链接 / 路径**；Leader 派活时显式带上该引用（如"读 `<PRD 链接>` 后做 X"），不靠口头约定。
+1. 上游完成后，由 skill 回传**稳定链接 / 路径**；对应小队负责人派活时显式带上该引用（如"读 `<PRD 链接>` 后做 X"），不靠口头约定。
 2. 门禁判词引用产物用「链接 + 编号」（如「`<API 契约链接>` 的 BR-3 缺错误码」），不写"前面那个文档"。
 3. 同一类产物永远用同一个 skill 落地——下游靠 skill 名称 + issue 标识定位，不靠搜索。
 4. 产物被修改后，引用不变、内容更新；下游门禁据此重新判门（见 gates 的「产物变更门禁失效」）。
@@ -76,6 +76,6 @@
 
 ## 7. 常见错误
 
-Bad: "@Designer 把设计传到 Figma，链接发我。"（平台名固化进提示词，换公司就失效）
+错误示例： "@UI/UE设计师 把设计传到 Figma，链接发我。"（平台名固化进提示词，换公司就失效）
 
-Better: "@Designer 产出 UI 设计，用 `multica-artifact-ui-sync` skill 落地并回传链接。"（平台在 skill 内，提示词可复制）
+改进示例： "@UI/UE设计师 产出 UI 设计，用 `multica-artifact-ui-sync` skill 落地并回传链接。"（平台在 skill 内，提示词可复制）

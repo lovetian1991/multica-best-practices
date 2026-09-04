@@ -9,12 +9,14 @@ README.md            Project entry: quick start / principles / structure (biling
 AGENTS.md            Agent entry: project conventions and change rules (always English)
 templates/           Everything copy-paste-ready (split by language)
 ├── zh_CN/           Chinese templates (default)
-│   ├── agents/      Shared Agent Instructions (9 role definitions)
+│   ├── agents/      Shared Agent Instructions (17 role definitions: 11 regular + 6 dedicated Reviewers)
 │   ├── skills/      Shared Skills (unified multica- prefix; see three-layer model)
 │   │   ├── multica-gate-setup/  CI hard-gate templates ship inside this Skill
 │   │   ├── multica-artifact-*-sync/  Orchestration skills landing content to team platforms (5; platform decoupled from roles)
 │   │   └── multica-platform-*/  Platform-layer shells (Confluence/JIRA/Jenkins) — only place holding company-specific URLs/credentials
 │   └── squad/       Squad starters (copy the whole subdirectory and run)
+│       ├── product-design/      Product-feature design with ProductManager first and ProductLeader unified review
+│       ├── development/          Development-focused dynamic staffing
 │       ├── software-development/  Regular development (recommended)
 │       └── bug-fix/               Minimal fix combination
 └── en_US/           English templates (same structure as zh_CN/)
@@ -27,6 +29,7 @@ SECURITY.md          Security check before sharing templates
 - **Skill naming**: `multica-` prefix + lowercase hyphenated; the `name` field in `SKILL.md` matches the directory name.
 - **Skills mount by name**: documents reference `multica-xxx` (in backticks), never a repo path.
 - **Agent naming**: `role + project + member-id` (e.g. `BackendDev-user-service-u1024`).
+- **Production Agent display names**: edit only `scripts/agent-names.ps1`; logical role IDs such as `ProductManager` and `FrontendDev` remain stable protocol identifiers.
 - **Directory semantics**: inside each language tree, `agents/` = roles, `skills/` = practices, `squad/` = squad combinations, and `docs/` = methodology. CI hard-gate templates live in the `multica-gate-setup` skill; artifact landing to team platforms lives in the five `multica-artifact-*-sync` skills (see `artifact-conventions.md` — platforms are decoupled from role prompts, swappable per company); there is no standalone `gates/` directory.
 - **Three-layer skill model**: content lives in role prompts (no platform names), orchestration lives in `multica-artifact-*-sync` skills (which call a platform skill), and company-specific URLs/credentials live **only** in `multica-platform-*` shells. Public repo ships content + orchestration + platform shells; a team fills the shells' `config.yaml` / `scripts/` without touching roles.
 

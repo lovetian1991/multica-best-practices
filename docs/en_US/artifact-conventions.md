@@ -39,7 +39,7 @@ The "analysis / design" skills own **content**; the "artifact-sync" skills own *
 | Artifact | Owner | Content spec (role side) | Sync skill (platform side, swappable) |
 | --- | --- | --- | --- |
 | UI design | @Designer | page structure, states, interaction, annotations (aligned to PRD IA) | `multica-artifact-ui-sync` (default Figma) |
-| Product requirement PRD | @ProductManager | G-/FR-/BR-/AC-/KPI-/RISK-/OP- numbered requirements | `multica-artifact-req-sync` (default Wiki platform) |
+| Product requirement PRD | @ProductManager | Feature-named `prd-<feature-name>.md` using a short, readable Chinese feature name, with G-/FR-/BR-/AC-/KPI-/RISK-/OP- numbered requirements | `multica-artifact-req-sync` (default Wiki platform) |
 | Technical design doc | @Architect | current arch, minimal change, affected components, steps, risks | `multica-artifact-design-sync` (default Git repo / Wiki platform) |
 | API contract | @BackendDev | endpoints, in/out params, error codes, auth, BR- mapping | `multica-artifact-api-sync` (default API tool) |
 | Test cases / report | @Tester | feature/api cases, AC- coverage, test report | `multica-artifact-test-sync` (default case platform) |

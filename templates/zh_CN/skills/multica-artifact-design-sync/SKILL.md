@@ -1,6 +1,6 @@
 ---
 name: multica-artifact-design-sync
-description: 把技术设计文档落地到 Confluence（默认父页面 <CONFLUENCE_DESIGN_PAGE_ID>）并回写 JIRA 链接。用于 @Architect 发布设计，供实现与测试下游消费。
+description: 把技术设计文档落地到 Confluence（默认父页面 <CONFLUENCE_DESIGN_PAGE_ID>）并回写 JIRA 链接。用于 @技术架构师 发布设计，供实现与测试下游消费。
 metadata:
   orchestrates:
     - multica-platform-confluence
@@ -10,13 +10,13 @@ metadata:
     local_draft: "docs/design/<ISSUE-KEY>/design.md"
 ---
 
-# Artifact · Technical Design Sync
+# 产物 · 技术设计同步
 
-## Purpose
+## 用途
 
-编排 **Confluence 发布 + JIRA 描述回写**，把 @Architect 的技术设计变成下游可引用的稳定链接。
+编排 **Confluence 发布 + JIRA 描述回写**，把 @技术架构师的技术设计变成下游可引用的稳定链接。
 
-> 平台能力在 `multica-platform-confluence` 与 `multica-platform-jira`；本 skill 只管「设计产物」编排，不换平台时不动 Architect 提示词。
+> 平台能力在 `multica-platform-confluence` 与 `multica-platform-jira`；本 skill 只管「设计产物」编排，不换平台时不动 技术架构师 提示词。
 
 ## 前置
 
@@ -33,7 +33,7 @@ metadata:
 
 设计目录页：[pageId=<CONFLUENCE_DESIGN_PAGE_ID>](http://<CONFLUENCE_URL>/pages/viewpage.action?pageId=<CONFLUENCE_DESIGN_PAGE_ID>)
 
-## Workflow（来自 dev-workflow design publish）
+## 流程（来自 dev-workflow design publish）
 
 1. **发布 Markdown → Confluence**（同 title 则更新版本，title 加 `[AI]` 后缀）：
 
@@ -53,7 +53,7 @@ bash "$MULTICA_SKILLS_ROOT/multica-platform-jira/scripts/jira.sh" append-descrip
   <ISSUE-KEY> $'h3. 设计文档 (Design Document)\n* [<title>|<url>]\n* _Auto-published from: design.md_\n'
 ```
 
-4. 向 Leader 回传 **Confluence 链接**（稳定引用）。
+4. 向对应小队负责人回传 **Confluence 链接**（稳定引用）。
 
 或使用本 skill 编排脚本：
 
@@ -67,7 +67,7 @@ bash scripts/publish-design.sh <ISSUE-KEY> docs/design/<ISSUE-KEY>/design.md
 
 ## 用法（角色侧只写这一句）
 
-> @Architect：「先用 `multica-technical-design` 写 `docs/design/<ISSUE-KEY>/design.md`，再用本 skill 发布到 Confluence 并回传链接。」
+> @技术架构师：「先用 `multica-technical-design` 写 `docs/design/<ISSUE-KEY>/design.md`，再用本 skill 发布到 Confluence 并回传链接。」
 
 ## 替换平台
 

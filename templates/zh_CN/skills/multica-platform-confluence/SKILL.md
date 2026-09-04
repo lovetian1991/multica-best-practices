@@ -13,24 +13,24 @@ metadata:
     design_local_draft: docs/design/<ISSUE-KEY>/design.md
 ---
 
-# Platform · Confluence
+# 平台 · Confluence
 
-## Purpose
+## 用途
 
-Confluence **读 + 写**能力：拉取已有页面供 Agent 消费，把 PRD / 设计等产物落地并回传**稳定页面链接**。与 `multica-platform-jira` 解耦——只负责 Confluence，不负责 JIRA 字段写入。
+Confluence **读 + 写**能力：拉取已有页面供 智能体 消费，把 PRD / 设计等产物落地并回传**稳定页面链接**。与 `multica-platform-jira` 解耦——只负责 Confluence，不负责 JIRA 字段写入。
 
 > 角色提示词不写 Confluence URL / pageId；换 Wiki / 语雀 / 飞书只换本 skill。
 
 ## 默认落点
 
-| 产物类型 | Confluence 父页面 | 本地草稿（Agent 先写） |
+| 产物类型 | Confluence 父页面 | 本地草稿（智能体 先写） |
 | --- | --- | --- |
 | PRD | `config.yaml` → `confluence.default_parent_page_id` | 由 `multica-requirement-analysis` 结构化后交 req-sync 编排 |
 | 技术设计 | **`<CONFLUENCE_DESIGN_PAGE_ID>`**（`confluence.design_parent_page_id`） | `docs/design/<ISSUE-KEY>/design.md` |
 
 设计文档父页面：[pageId=<CONFLUENCE_DESIGN_PAGE_ID>](http://<CONFLUENCE_URL>/pages/viewpage.action?pageId=<CONFLUENCE_DESIGN_PAGE_ID>)
 
-## Files
+## 文件
 
 ```text
 multica-platform-confluence/
@@ -52,7 +52,7 @@ multica-platform-confluence/
         └── design-template.md
 ```
 
-## Read（下游 / Leader 拉取上游产物）
+## 读取（下游 / 对应小队负责人拉取上游产物）
 
 ```bash
 # 按 pageId 拉取为 Markdown（可选写入 docs/design/<ISSUE-KEY>/ 或自定义目录）
@@ -67,7 +67,7 @@ bash scripts/confluence.sh find-page "<title>" [space_key]
 
 **典型链路**：JIRA Issue 描述含 Confluence 链接 → 用 `multica-platform-jira` 的 `get-confluence-url` 解析 pageId → 本 skill `fetch-page` 拉取 PRD / 设计正文。
 
-## Write（产物落地）
+## 写入（产物落地）
 
 ### PRD 页面（HTML）
 
@@ -75,11 +75,11 @@ bash scripts/confluence.sh find-page "<title>" [space_key]
 bash scripts/confluence.sh create-page "<title>" "<parent_page_id>" "<html>" "<space_key>"
 ```
 
-由 `multica-artifact-req-sync` 编排调用；Confluence 不可用时见 req-sync Workflow E（全文降级到 JIRA 描述）。
+由 `multica-artifact-req-sync` 编排调用；Confluence 不可用时见 req-sync 流程 E（全文降级到 JIRA 描述）。
 
 ### 技术设计（Markdown → Confluence）
 
-1. @Architect 用 `multica-technical-design` 写本地：`docs/design/<ISSUE-KEY>/design.md`（基线见 `scripts/templates/design-template.md`）。
+1. @技术架构师 用 `multica-technical-design` 写本地：`docs/design/<ISSUE-KEY>/design.md`（基线见 `scripts/templates/design-template.md`）。
 2. 发布到设计父页面下：
 
 ```bash
@@ -92,14 +92,14 @@ python scripts/publish_design.py <ISSUE-KEY> docs/design/<ISSUE-KEY>/design.md \
 
 **Upsert 规则**：同 space + 同 title 则更新版本；title 自动加 `[AI]` 后缀。
 
-## Agent Compatibility
+## 智能体兼容性
 
 - 凭据优先级见 frontmatter `metadata.credentials`；禁止打印密码。
 - 外部写入前确认：space、parent pageId、标题。
 - 优先用 `scripts/`，不要裸调 REST。
 - 编排脚本通过 `MULTICA_SKILLS_ROOT` 或同级 `templates/skills/` 定位本 skill（见 `scripts/lib/resolve_skills.sh`）。
 
-## Adapting To A New Team
+## 适配新团队
 
 1. 改 `config.yaml`：`confluence.url`、`default_space`、`*_parent_page_id`。
 2. 设计文档父页面 ID 改为团队 Confluence 目录页。

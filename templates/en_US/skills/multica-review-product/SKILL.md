@@ -16,7 +16,13 @@ Structured professional review framework for **PRD / requirement artifacts**. Ca
 2. **Goal explicit**: problem measurable, no vagueness.
 3. **Acceptance testable**: every AC- objectively verifiable, no "good experience" vagueness.
 4. **Constraints complete**: permissions, exceptions, compliance, dependencies, data口径 listed.
-5. **Open items**: OP- fully listed, not blocking downstream dev (blocking OP- = blocking item).
+5. **Open items**: OP- items are complete and correctly classified as blocking or non-blocking follow-ups. Only an OP- that affects current scope, business rules, permission / data definitions, AC-, or security/compliance may block.
+
+## OP- decision rules
+
+- **Blocking item**: if unresolved, the current scope, a material business rule, permission / data definition, AC-, or security/compliance cannot be decided or accepted, or downstream design / development would face material rework. An open blocking item may cause FAIL.
+- **Non-blocking follow-up**: ordinary preferences, copy details, implementation choices, information that can be supplied later, or anything that does not affect current scope or acceptance. Record an owner and follow-up timing when applicable, but it must not cause FAIL or block downstream work that already has enough definition.
+- ProductReviewer must not FAIL the whole artifact merely because "all OP- items are not closed." Check whether the classification is justified and list non-blocking follow-ups separately.
 
 ## Output format
 ```
@@ -24,7 +30,7 @@ Structured professional review framework for **PRD / requirement artifacts**. Ca
 Conclusion: PASS / FAIL
 Blocking items (required on FAIL, each: rationale / involved point / fix direction):
 - ...
-Suggestions (non-blocking):
+Non-blocking follow-ups (do not block PASS; include owner / timing when applicable):
 - ...
 Previous fix-list check (re-review): resolved X / unresolved Y
 Round: N / 3

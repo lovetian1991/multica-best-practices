@@ -5,7 +5,7 @@ description: 查询已部署的 multica 平台 API，获取 workspace / agent �
 
 # multica-manage-skills
 
-## Overview
+## 概览
 
 multica 是自部署的 agent 编排平台（线上地址 `<MULTICA_API_URL>`）。本 skill 提供一套可随时调用的 Python API 客户端，用于拉取 workspace 列表、每个 workspace 的 agent 列表、agent 30 天运行次数与日活明细，并输出汇总报表。
 
@@ -83,7 +83,7 @@ python scripts/multica_api.py --token YOUR_API_TOKEN --url <MULTICA_API_URL> rep
 - `GET /api/me`、`GET /api/workspaces` 无需 workspace 头
 - `GET /api/agents`、`GET /api/agent-run-counts`、`GET /api/agent-activity-30d` 需要 `X-Workspace-Slug`
 
-## Resources
+## 资源
 
 - `scripts/multica_api.py` — 上述 API 客户端 + CLI（纯标准库，可直接运行或 import）
 - `references/api_reference.md` — 端点、请求头、响应结构说明（来自 multica 源码）

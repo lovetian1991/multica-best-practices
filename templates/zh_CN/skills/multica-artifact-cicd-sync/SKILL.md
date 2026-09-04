@@ -9,13 +9,13 @@ metadata:
     python: ">=3.10"
 ---
 
-# Artifact · CI/CD Sync（编排）
+# 产物 · CI/CD 同步（编排）
 
-## Purpose
+## 用途
 
 G2 PASS + push 后，调用 `multica-platform-jenkins` 触发 dev/sit Job。**参数由 Jenkins API 自动发现**，编排层不硬编码参数名。
 
-## Agent 流程
+## 智能体 流程
 
 ```text
 1. discover-only（推荐先跑，检查 missing）：
@@ -35,7 +35,7 @@ G2 PASS + push 后，调用 `multica-platform-jenkins` 触发 dev/sit Job。**�
 
 ---
 
-## Workflow A：dev 部署
+## 流程 A：dev 部署
 
 ```bash
 python scripts/trigger_cicd.py \
@@ -46,7 +46,7 @@ python scripts/trigger_cicd.py \
   --json
 ```
 
-## Workflow B：sit 部署（G2.5 → Tester T3）
+## 流程 B：sit 部署（G2.5 → 测试专家 T3）
 
 ```bash
 python scripts/trigger_cicd.py \
@@ -58,7 +58,7 @@ python scripts/trigger_cicd.py \
 
 `<ISSUE_PREFIX_A>` / `<ISSUE_PREFIX_B>` / `<ISSUE_PREFIX_C>` / `<ISSUE_PREFIX_D>` 等前缀已在 `config.yaml` → `issue_service_map` 配置，可省略 `--service`。
 
-## Workflow C：多服务
+## 流程 C：多服务
 
 ```bash
 python scripts/trigger_cicd.py --env sit --service <service1>,<service2> --branch release/<ISSUE_KEY>-xxx --json

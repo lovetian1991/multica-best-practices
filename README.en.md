@@ -17,7 +17,7 @@ In one sentence: **a set of Multica squad configurations continuously refined th
 ```text
 You create: Agents (roles) + Squad (orchestration) + Skills (practices) + Issue (task)
                   ↓
-       Leader runs the squad: converge (G0) → design → implement → test → deploy
+       Leader runs the squad: ProductManager definition → Leader decides whether UI/technical design is needed → Leader final review → implement → test → deploy
                   ↓
    Gate each step (rerun via the multica-verification skill) → Human final acceptance
    ```
@@ -33,13 +33,18 @@ You create: Agents (roles) + Squad (orchestration) + Skills (practices) + Issue 
    | DevOps | Trigger CI/CD after G2, return deploy URL | Write business code / self-claim deploy success |
    | Reviewer | Business review (design / critical changes) | Replace objective verification / replace human acceptance |
    | Leader | Orchestration and gatekeeping (multica-verification skill) | Implement personally / rubber-stamp itself |
+   | ProductLeader | Product triage, scope convergence, product review, and development handoff | Author the PRD / UI / technical design personally |
+   | DevelopmentLeader | Development triage, technical staffing, development gates, and handoff | Write code personally / modify an engineer's artifact |
 
    > Note: the `software-development-reviewed` Starter adds dedicated Reviewers (ArchReviewer / DesignReviewer / ProductReviewer / FrontendReviewer / BackendReviewer / TestReviewer) for every regular producing role except Leader and DevOps; see Starters and [gates-and-evidence](docs/en_US/gates-and-evidence.md#two-layer-gate-generic-gate--professional-artifact-review).
+   > `Product Design` uses `ProductLeader`, while `Development` and `Software Development` use `DevelopmentLeader`; the generic `Leader` remains available to `Software Development Reviewed`, `Bug Fix`, and other general-purpose Squads.
 
    ## Starters
 
    | Starter | Use | Status |
    | --- | --- | --- |
+    | [Product Design](./templates/en_US/squad/product-design/README.md) | Product-feature design with ProductManager first, optional UI / feasibility work, and ProductLeader unified review | Experimental |
+   | [Development](./templates/en_US/squad/development/README.md) | Development-focused flow (Leader dynamically staffs Architect / frontend / backend by complexity) | Experimental |
    | [Software Development](./templates/en_US/squad/software-development/README.md) | Regular feature development (frontend/backend routed by scope; any role can be missing) | Recommended |
    | [Software Development (Reviewed)](./templates/en_US/squad/software-development-reviewed/README.md) | Extends Software Development with a dedicated Reviewer per regular role and a two-layer gate (generic gate + professional artifact review) | Experimental |
    | [Bug Fix](./templates/en_US/squad/bug-fix/README.md) | Root cause / fix / regression (routed by impact, skips Architect) | Experimental |
@@ -52,10 +57,12 @@ You create: Agents (roles) + Squad (orchestration) + Skills (practices) + Issue 
    AGENTS.md     ⭐ Agent entry: project conventions & change rules
    templates/  ⭐ Start here: all copy-ready config
    ├── zh_CN/              Chinese templates (default; copy the whole subdir)
-   │   ├── agents/           Shared Agent Instructions (15 role defs: 9 regular + 6 dedicated Reviewers)
+   │   ├── agents/           Shared Agent Instructions (17 role defs: 11 regular + 6 dedicated Reviewers)
    │   ├── skills/           Shared Skills (22, unified multica- prefix: gatekeeping / CI integration / test design / requirement analysis / technical design / implementation / artifact-orchestration / platform-shell / 6 dedicated reviews)
    │   │   └── multica-gate-setup/  CI hard-gate templates ship inside this Skill (delivery-gate.yml, etc.)
    │   └── squad/            Squad starters
+    │       ├── product-design/      Product-feature design: ProductManager first + ProductLeader unified review
+   │       ├── development/          Development-focused dynamic staffing
    │       ├── software-development/  Regular development (squad / issue / README incl. workflow)
    │       ├── software-development-reviewed/  Strengthened: dedicated Reviewer per role + two-layer gate
    │       └── bug-fix/              Minimal fix combination (only the orchestration changes)
@@ -64,6 +71,8 @@ You create: Agents (roles) + Squad (orchestration) + Skills (practices) + Issue 
    ├── zh_CN/              Chinese methodology
    └── en_US/              English methodology
    ```
+
+The `templates/*/squad/development` Starter is the focused option when you want development to act as an independent, composable Squad. It reuses the existing Agents and lets the Leader activate Architect, FrontendDev, and BackendDev according to task complexity.
 
    ## Full flow at a glance
 
@@ -76,7 +85,7 @@ flowchart TB
     subgraph P0["Phase 0: requirement convergence & G0"]
         direction TB
         L0["@Leader<br/>reads Issue, finds the source of truth"]
-        PM["@ProductManager (optional)<br/>multica-requirement-analysis<br/>+ multica-artifact-req-sync"]
+        PM["@ProductManager (mandatory first stop for product requests)<br/>multica-requirement-analysis<br/>+ multica-artifact-req-sync<br/>lightly reuses and validates existing content"]
         REQ[/"Requirement source of truth<br/>PRD or existing Issue<br/>G- FR- BR- AC- OP- RISK-"/]
         SCOPE["@Leader<br/>scope, roles present, routing<br/>declare deploy branch"]
         OP{"OP- closed & scope clear?"}
@@ -213,10 +222,14 @@ Don't have one yet? Read the [Multica docs](https://www.multica.ai/docs) or [How
 
 👉 **[`templates/en_US/squad/software-development/README.md`](./templates/en_US/squad/software-development/README.md)**
 
+For product-first work, use **[`templates/en_US/squad/product-design/README.md`](./templates/en_US/squad/product-design/README.md)**. It uses the dedicated `ProductLeader`; every request goes through ProductManager first, Designer / Architect are activated only when needed, and ProductLeader performs the unified review before handing off a product definition package for development.
+
+For development-only work, use **[`templates/en_US/squad/development/README.md`](./templates/en_US/squad/development/README.md)**. It uses the dedicated `DevelopmentLeader`, reuses the existing engineering Agents, lets DevelopmentLeader staff Architect, FrontendDev, and BackendDev by complexity, and hands the result to QA or deployment/operations afterward.
+
 You get:
 
 - 1 Squad Leader (orchestration + gatekeeping)
-- 9 Agents: Leader / ProductManager / Architect / Designer / FrontendDev / BackendDev / Tester / Reviewer / DevOps
+- The regular development Starter uses 9 Agents; the product and development Starters additionally use `ProductLeader` / `DevelopmentLeader`
 - 16 Skills (`multica-verification` is the mandatory gatekeeping Skill)
 - 1 Issue template (with the "affected ends" scope declaration; source supports "linked / fully self-contained" — pick one)
 - 1 software-development workflow (conditional routing where any role can be missing, incl. G2.5 CI/CD)
@@ -237,7 +250,7 @@ In Multica, create 9 Agents (naming follows [`docs/en_US/naming-conventions.md`]
 | Reviewer | `reviewer.md` |
 | DevOps | `devops.md` |
 
-> `leader.md` does not need a separate Agent: Squad Instructions only inject the Leader, and `squad.md` is its behavior config. ProductManager is optional — dispatched by the Leader only when the requirement has no ready-scope marker.
+> `leader.md` does not need a separate Agent: Squad Instructions only inject the Leader, and `squad.md` is its behavior config. Product, page, button, workflow, and UI changes always dispatch ProductManager first; an existing PRD / Issue is lightly reused and validated, not used to bypass ProductManager. A pure technical task or clearly bounded bug that changes neither product scope, business rules, nor UI may explicitly record `ProductManager N/A` through the Leader.
 
 ### Step 2 — Create Skills
 

@@ -9,7 +9,16 @@ description: Land product requirement / PRD artifacts to the requirement knowled
 
 Land product requirement artifacts to the team's unified requirement platform and let downstream retrieve them via a stable reference.
 
+The Product Design Squad maintains one final feature-named PRD file, `prd-<feature-name>.md`. This skill lands and updates that document, including later UI / UX and technical-constraint additions, without creating separate final documents for different roles.
+
 > This skill decouples "platform integration" from "role prompt": the role prompt only says "produce PRD", not which platform. Changing companies (Wiki / Yuque / Feishu / internal KB) means editing only this skill, not the @ProductManager prompt.
+
+## Single PRD rule
+
+- ProductManager creates `prd-<feature-name>.md` first and completes the detailed feature inventory, requirement design, business rules, and ACs. The feature name must be a short, stable, readable Chinese name, such as `用户邀请` or `订单退款`; do not use the generic `prd.md`.
+- Designer and Architect append their assigned sections to the same feature PRD in the sequence chosen by ProductLeader, using stable references for UI / UX and technical additions.
+- On later syncs, update the existing PRD page or its version instead of creating parallel final documents such as "UI PRD", "Technical PRD", or a synonym PRD for the same feature.
+- The stable link returned to ProductLeader must point to the merged feature PRD; standalone design or technical drafts may only be references inside it.
 
 ## Default platform: Confluence
 
@@ -19,7 +28,7 @@ Land product requirement artifacts to the team's unified requirement platform an
 
 ## Content spec (platform-independent part)
 
-PRD at least contains (see @ProductManager role instruction): one-line definition, background, goals G- + KPI-, users & permissions, scope, FR-/BR-/AC-, field definitions, empty/error/no-permission states, RISK-/OP-, revision log.
+PRD at least contains (see @ProductManager role instruction): one-line definition, background, goals G- + KPI-, users & permissions, scope, detailed feature inventory, FR-/BR-/AC-, preconditions, main / branch / error flows, boundary conditions, UI / UX, technical constraints, field definitions, empty/error/no-permission states, RISK-/OP-, and revision log.
 
 ## Usage (role side writes only this line)
 

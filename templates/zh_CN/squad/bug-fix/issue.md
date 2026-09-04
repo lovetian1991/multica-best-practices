@@ -1,6 +1,6 @@
-# Issue Template
+# Issue 模板
 
-> 复制到新 Issue，填写后交给 Squad。
+> 复制到新 Issue，填写后交给小队。
 
 ```markdown
 # Bug

@@ -1,14 +1,14 @@
 ---
 name: multica-review-designer
-description: UI 设计专属评审框架。由 DesignReviewer 调用，对 Designer 产出的 UI/交互设计做专业分析（交互合理性/可访问性/设计系统一致/边界态），输出 PASS/FAIL 与修改清单，汇报 Leader。
+description: UI 设计专属评审框架。由 设计评审 调用，对 UI/UE设计师 产出的 UI/交互设计做专业分析（交互合理性/可访问性/设计系统一致/边界态），输出 PASS/FAIL 与修改清单，汇报对应小队负责人。
 ---
 
-# UI 设计专业评审（DesignReviewer）
+# UI 设计专业评审（设计评审）
 
-本 skill 提供对 **UI / 交互设计产物**的结构化专业评审框架。调用方为 `DesignReviewer`，评审对象为 `Designer` 经 `multica-artifact-ui-sync` 回传的 Figma/设计平台链接。
+本 skill 提供对 **UI / 交互设计产物**的结构化专业评审框架。调用方为 `设计评审`，评审对象为 `UI/UE设计师` 经 `multica-artifact-ui-sync` 回传的 Figma/设计平台链接。
 
 ## 什么时候用
-- DesignReviewer 收到 Leader 派发的「评审 UI 设计」任务时。
+- 设计评审收到对应小队负责人派发的「评审 UI 设计」任务时。
 - 设计修改后进入复审轮次时（对照上一轮修改清单逐条核对）。
 
 ## 评审维度（逐项给结论）
@@ -16,7 +16,7 @@ description: UI 设计专属评审框架。由 DesignReviewer 调用，对 Desig
 2. **可访问性**：对比度、焦点管理、无障碍标注是否到位。
 3. **设计系统一致性**：组件、字号、间距、状态是否对齐设计系统/验收约定。
 4. **边界态**：空态、加载态、错误态、超长文本是否被覆盖。
-5. **技术可行性**：是否存在明显不可实现或高成本的交互（标记并交 Leader 收敛）。
+5. **技术可行性**：是否存在明显不可实现或高成本的交互（标记并交对应小队负责人收敛）。
 
 ## 输出格式
 ```
@@ -29,9 +29,9 @@ description: UI 设计专属评审框架。由 DesignReviewer 调用，对 Desig
 与上一轮修改清单核对（复审时）：已解决 X 项 / 未解决 Y 项
 轮次：第 N / 3 轮
 ```
-结论与修改清单**汇报给 Leader**，不自行改设计、不自行通知 Designer。
+结论与修改清单**汇报给对应小队负责人**，不自行改设计、不自行通知UI/UE设计师。
 
 ## 边界
 - 只评 UI 设计，不评架构、需求、代码、测试用例。
-- 不替代 Leader 的通用门禁（multica-verification skill）。
-- 第 3 轮仍 FAIL → 标注「升级人类」，交 Leader 处理，停止循环。
+- 不替代对应小队负责人的通用门禁（`multica-verification` skill）。
+- 第 3 轮仍 FAIL → 标注「升级人类」，交对应小队负责人处理，停止循环。

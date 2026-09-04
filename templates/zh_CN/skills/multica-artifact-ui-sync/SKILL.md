@@ -1,21 +1,21 @@
 ---
 name: multica-artifact-ui-sync
-description: 把 UI / 交互设计产物对接到设计协作平台（默认 Figma）。用于 @Designer 上传视觉稿、取回链接与标注，供前端下游消费。平台可替换。
+description: 把 UI / 交互设计产物对接到设计协作平台（默认 Figma）。用于 @UI/UE设计师 上传视觉稿、取回链接与标注，供前端下游消费。平台可替换。
 ---
 
-# Artifact · UI Design Sync
+# 产物 · UI 设计同步
 
-## Purpose
+## 用途
 
 把 UI 设计产物落地到团队统一的设计协作平台，并让下游（前端）用稳定方式取回。
 
-> 本 skill 把「平台对接」与「角色提示词」解耦：角色提示词只说"产出 UI 设计"，不关心平台。换公司（用 Zeplin / 蓝湖 / MasterGo 等）只改本 skill，不动 @Designer 提示词。
+> 本 skill 把「平台对接」与「角色提示词」解耦：角色提示词只说"产出 UI 设计"，不关心平台。换公司（用 Zeplin / 蓝湖 / MasterGo 等）只改本 skill，不动 @UI/UE设计师 提示词。
 
 ## 默认平台：Figma
 
 - 产出：Figma 文件链接 + 标注（颜色 / 间距 / 字号 / 组件）+ 切图 / 导出。
 - 上传：在 Figma 内完成设计后，把**文件链接**与**关键 Frame 链接**作为产物引用。
-- 取回：下游 @FrontendDev 通过链接读取，链接即稳定引用，不依赖本地文件。
+- 取回：下游 @前端开发专家 通过链接读取，链接即稳定引用，不依赖本地文件。
 
 ## 产物内容规范（与角色解耦的部分）
 
@@ -27,7 +27,7 @@ description: 把 UI / 交互设计产物对接到设计协作平台（默认 Fig
 
 ## 用法（角色侧只写这一句）
 
-> @Designer：「产出 UI 设计，用 `multica-artifact-ui-sync` skill 落地到团队设计平台，并把链接回传给 Leader。」
+> @UI/UE设计师：「产出 UI 设计，用 `multica-artifact-ui-sync` skill 落地到团队设计平台，并把链接回传给对应小队负责人。」
 
 ## 替换平台（不改角色提示词）
 

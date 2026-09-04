@@ -1,21 +1,21 @@
 ---
 name: multica-artifact-test-sync
-description: 把测试用例 / 测试报告产物对接到用例管理平台（默认本地 XMind 转 Jira）。用于 @Tester 上传用例、回传链接，供验收下游消费。平台可替换。
+description: 把测试用例 / 测试报告产物对接到用例管理平台（默认本地 XMind 转 Jira）。用于 @测试专家 上传用例、回传链接，供验收下游消费。平台可替换。
 ---
 
-# Artifact · Test Case Sync
+# 产物 · 测试用例同步
 
-## Purpose
+## 用途
 
-把测试用例 / 测试报告落地到团队统一的用例管理平台，并让下游（验收 / Reviewer）用稳定方式取回。
+把测试用例 / 测试报告落地到团队统一的用例管理平台，并让下游（验收 / 业务评审）用稳定方式取回。
 
-> 本 skill 把「平台对接」与「角色提示词」解耦：角色提示词只说"产出测试用例"，不关心平台。换公司（用 TestRail / Zephyr / 禅道 / 内部用例库）只改本 skill，不动 @Tester 提示词。
+> 本 skill 把「平台对接」与「角色提示词」解耦：角色提示词只说"产出测试用例"，不关心平台。换公司（用 TestRail / Zephyr / 禅道 / 内部用例库）只改本 skill，不动 @测试专家 提示词。
 
 ## 默认平台：本地 XMind 转 Jira
 
 - 产出：功能用例 / 接口用例 / 测试报告（依据 `multica-test-design` skill）。
 - 上传：本地用 XMind 编写用例心智图，经转换脚本 / 工具导入 Jira（测试用例 / 缺陷关联 Issue）。回传 Jira **用例集链接**与 Issue 关联号。
-- 取回：下游 @ProductManager / @Reviewer 通过 Jira 链接读取，链接即稳定引用。
+- 取回：下游 @产品经理 / @业务评审 通过 Jira 链接读取，链接即稳定引用。
 
 ## 产物内容规范（与角色解耦的部分）
 
@@ -23,7 +23,7 @@ description: 把测试用例 / 测试报告产物对接到用例管理平台（�
 
 ## 用法（角色侧只写这一句）
 
-> @Tester：「产出用例 / 报告，用 `multica-artifact-test-sync` skill 落地到团队用例平台，并回传链接。」
+> @测试专家：「产出用例 / 报告，用 `multica-artifact-test-sync` skill 落地到团队用例平台，并回传链接。」
 
 ## 替换平台（不改角色提示词）
 

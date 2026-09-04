@@ -14,4 +14,4 @@ gh api -X PUT "repos/$OWNER/$REPO/branches/$BRANCH/protection" \
   --header "Accept: application/vnd.github+json" \
   --input - <<< "$RULE"
 
-echo "✅ Done. 此后 PR 必须 CI 绿 + 独立审批才能合入。"
+echo "✅ 完成。此后 PR 必须 CI 绿 + 独立审批才能合入。"

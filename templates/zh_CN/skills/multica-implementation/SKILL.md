@@ -3,13 +3,13 @@ name: multica-implementation
 description: 以最小不必要的改动实现已批准的技术方案。用于编码、补测试、跑验证。
 ---
 
-# Implementation
+# 实现
 
-## Purpose
+## 用途
 
 以最少的不必要改动，实现已批准的技术方案。
 
-## Rules
+## 规则
 
 1. 先读再改。
 2. 遵循现有约定。
@@ -19,7 +19,7 @@ description: 以最小不必要的改动实现已批准的技术方案。用于�
 6. 运行现有验证。
 7. 报告实际证据。
 
-## Completion Evidence
+## 完成证据
 
 - 变更文件
 - 重要改动说明

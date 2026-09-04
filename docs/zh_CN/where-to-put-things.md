@@ -1,27 +1,27 @@
 # 不知道某条指令该放哪？
 
-> 这是本仓库最有价值的一页。记住它，胜过读 100 个 Prompt。
+> 这是本仓库最有价值的一页。记住它，胜过读 100 个提示词。
 
 ## 速查表
 
-| 我想告诉 Agent…… | 放这里 |
+| 我想告诉 智能体…… | 放这里 |
 | --- | --- |
 | 「这次要做什么」 | Issue |
-| 「这个项目有哪些背景」 | Project Instructions |
-| 「你是什么角色」 | Agent Instructions |
-| 「谁负责什么」 | Squad Instructions |
+| 「这个项目有哪些背景」 | Project 提示词 |
+| 「你是什么角色」 | 智能体 提示词 |
+| 「谁负责什么」 | 小队提示词 |
 | 「各阶段产物放哪 / 下游怎么读」 | 由 `multica-artifact-*-sync` skill 落地到团队平台并回传稳定链接（见 [artifact-conventions](./artifact-conventions.md)） |
 | 「怎么做某类检查」 | Skill |
 | 「必须通过测试」 | CI（工程系统） |
-| 「谁最终决定上线」 | Human |
+| 「谁最终决定上线」 | 人类 |
 
 ## 心智模型
 
 ```text
 Issue    ↓ 我们在做什么？
 Project  ↓ 我们应该知道什么？
-Agent    ↓ 我的职责是什么？
-Squad    ↓ 谁应该做什么？
+智能体    ↓ 我的职责是什么？
+小队     ↓ 谁应该做什么？
 Skill    ↓ 我该怎么做？
 CI / PR  ↓ 什么必须真的通过？
 ```
@@ -29,28 +29,28 @@ CI / PR  ↓ 什么必须真的通过？
 ## 一句话版本
 
 ```text
-Agent  = 角色（Role）
+智能体  = 角色（Role）
 Skill  = 方法（Method）
-Squad  = 协调（Coordination）
+小队  = 协调
 Issue  = 任务（Task）
 CI     = 强制（Enforcement）
 ```
 
 ## 最常见的错误
 
-把一切都塞进一个「全知全能」的 Agent Prompt：
+把一切都塞进一个「全知全能」的智能体提示词：
 
 ```text
 你是一个全能的软件开发专家，需要分析需求、设计架构、
-写代码、测试、Review，并确保最终任务完成。
+写代码、测试、评审，并确保最终任务完成。
 ```
 
-❌ 它同时占用了 Agent、Squad、Skill、Issue 四个位置。改任务、换团队、调流程时全部失效。
+❌ 它同时占用了智能体、小队、Skill、Issue 四个位置。改任务、换团队、调流程时全部失效。
 
 ✅ 正确拆分：
 
-- Agent Instructions：**我是谁**（负责实现已确认的方案）
-- Squad Instructions：**谁做什么**（前端实现 → FrontendDev / 后端实现 + API 契约 → BackendDev（按 Issue 范围，缺失即跳过），判门 → Leader 用 multica-verification skill，业务评审 → Reviewer）
+- 智能体 提示词：**我是谁**（负责实现已确认的方案）
+- 小队提示词：**谁做什么**（前端实现 → 前端开发专家 / 后端实现 + API 契约 → 后台开发专家（按 Issue 范围，缺失即跳过），判门 → 对应小队负责人用 `multica-verification` skill，业务评审 → 业务评审）
 - Skill：**怎么做**（实现时的规则）
 - Issue：**做什么**（这个任务的目标与验收标准）
 

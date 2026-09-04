@@ -3,11 +3,11 @@ name: multica-gate-setup
 description: 集成 CI 硬门禁到目标仓库，并让判门感知 CI 结论。用于部署门禁、读取 check-runs 判 G2、无 CI 时降级软门禁。
 ---
 
-# Gate Setup（CI 门禁集成）
+# 门禁集成（CI 门禁集成）
 
 ## 这是什么
 
-把「验证」从 Agent 自觉升级为 CI 机器执行的集成 Skill。
+把「验证」从 智能体 自觉升级为 CI 机器执行的集成 Skill。
 核心思想（`multica-gatekit`）：**门禁出具方必须和被门禁方不同源**——作者无法自己盖章「测试通过」，只有 CI 的真实运行结果才算数。
 
 本 Skill 回答两个问题：
@@ -25,11 +25,11 @@ description: 集成 CI 硬门禁到目标仓库，并让判门感知 CI 结论�
 | `branch-protection.json` | 分支保护规则：要求 `delivery-gate` 状态检查通过 + 独立审批后才能合入 |
 | `apply-branch-protection.sh` | 用 `gh` CLI 把保护规则应用到仓库（修改占位符后运行） |
 
-适用场景：已有可跑的 test / lint / build 命令；不希望「Worker 自证完成」留下作弊空间；多 Squad 并行需要统一合入门禁。
+适用场景：已有可跑的 test / lint / build 命令；不希望「智能体 自证完成」留下作弊空间；多 Squad 并行需要统一合入门禁。
 
 ## 能力前提（按环境路由）
 
-Leader 只有 Skill + MCP，无 shell。因此按运行时环境走分支：
+对应小队负责人只有 Skill + MCP，无 shell。因此按运行时环境走分支：
 
 | 能力 | 判门（G2） | 部署（一次性） |
 | --- | --- | --- |
@@ -68,7 +68,7 @@ Leader 只有 Skill + MCP，无 shell。因此按运行时环境走分支：
    - **读不到 CI** → BLOCKED，如实报告，绝不转 PASS。
 4. 复跑动作在 CI 存在时是「核对结论 + diff」，不是重跑命令。
 
-## Result
+## 结果
 
 **PASS** —— CI 绿（或复跑通过）+ diff 范围正确。
 
@@ -80,11 +80,11 @@ Leader 只有 Skill + MCP，无 shell。因此按运行时环境走分支：
 
 同一验证功能的两种执行环境：
 
-- `multica-verification`：软门禁，Leader 复跑（CI 缺失时本 Skill 降级回它）
+- `multica-verification`：软门禁，对应小队负责人复跑（CI 缺失时本 Skill 降级回它）
 - `multica-gate-setup`：硬门禁集成——部署 + 判门感知 CI 结论
 
 **能上 CI 就上 CI**，软门禁是过渡；两者互补，不冲突。
 
 ## 为什么有效
 
-门禁如果只有「Agent 被要求检查」，就存在两类作弊：作者假装验证过、作者替自己盖章。CI 让出具方变成机器（不可伪造），本 Skill 把这条衔接编进流程——部署有明确清单，判门有明确结论来源，无 CI 时有明确降级，不靠临场发挥。
+门禁如果只有「智能体 被要求检查」，就存在两类作弊：作者假装验证过、作者替自己盖章。CI 让出具方变成机器（不可伪造），本 Skill 把这条衔接编进流程——部署有明确清单，判门有明确结论来源，无 CI 时有明确降级，不靠临场发挥。

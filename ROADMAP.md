@@ -5,10 +5,10 @@
 ```text
 Software Development Starter
 ├── 7 角色（Leader / Architect / Designer / FrontendDev / BackendDev / Tester / Reviewer）
-├── 1 Squad（条件路由：任意角色可缺失）
+├── 2 Squads（完整交付 + 聚焦开发动态编排）
 ├── 6 Skills
 ├── 1 Issue 模板（含「涉及端」范围声明）
-└── 1 Workflow
+└── 2 Workflows（完整交付 + 开发交接）
 ```
 
 ## 近期 / Near term
@@ -17,6 +17,8 @@ Software Development Starter
 - [x] Bug Fix Starter（跳过 Architect 的最小组合示范）/ minimal combo that skips Architect
 - [x] 前后端拆分 + 条件路由（任意角色可缺失，Issue 声明「涉及端」）/ frontend/backend split with conditional routing
 - [x] 国际化布局：README 双语切换 + `templates/`、`docs/` 按 `zh_CN/` / `en_US/` 双目录存放 / i18n layout with bilingual README and zh_CN/en_US template trees
+- [ ] Product Design Squad：ProductManager 先行 + 按需 UI / 技术可行性 + ProductLeader 统一评审 / product-feature design with ProductManager first, optional UI / feasibility work, and ProductLeader unified review
+- [ ] Development Squad：Leader 按复杂度动态编排 Architect / FrontendDev / BackendDev，开发交接后可组合测试或运维小队 / development-focused Squad with Leader-driven staffing and downstream handoff
 - [ ] 产品流程编排验证：完整流程 / 无设计 / 无前端 / 无后端 四种小队跑真实需求 / validate four squad variants on real requirements
 - [ ] Technical Research Starter（Researcher → Leader 判门（multica-verification skill）→ Human）
 - [ ] 更多技术栈验证命令对照表（Java、Rust、monorepo）/ more stack-specific verification command tables

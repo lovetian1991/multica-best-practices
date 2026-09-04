@@ -23,10 +23,11 @@ Architect  FrontendDev  BackendDev
 Trim by the Issue's scope; any role can be missing:
 
 ```text
-Issue
-  ↓ G0 Determine scope (design? frontend? backend?) ── vague scope → write back to Issue / ask Human
-  ↓
-[Design] Architect ── G1: Leader (multica-verification skill) aligns acceptance criteria + Reviewer business review ── FAIL → back to Architect
+  Issue
+    ↓ ProductManager produces / validates the PRD (reuse existing content and current delta)
+    ↓ G0 Leader review and scope set (UI? technical design? frontend? backend?) ── vague scope → write back to Issue / ask Human
+    ↓
+[Design] after G0 PASS, dispatch Architect / Designer as needed ── G1: Leader (multica-verification skill) aligns acceptance criteria + Reviewer business review ── FAIL → back to the relevant design role
   ↓ PASS
 [In parallel]
   ├─ [Backend] BackendDev: API contract → Leader gate
@@ -50,7 +51,7 @@ Done
 
 | Artifact | Producer (per scope) | Gate |
 | --- | --- | --- |
-| Requirements ready | Issue / Human | G0 (scope + goal + acceptance criteria) |
+| Product requirements / requirements ready | ProductManager (reuse existing PRD / Issue content) | G0 (Leader reviews scope + goal + acceptance criteria) |
 | Design | Architect | G1 (Leader with the multica-verification skill + Reviewer business review) |
 | API contract | BackendDev | Leader gate (parallel input for frontend / testing) |
 | Feature cases | Tester | Leader gate |
@@ -86,7 +87,7 @@ Tester
 Reviewer
 ```
 
-Add `DevOps` when scope includes CI/CD; `ProductManager` when the Issue doesn't already provide a ready scope. Copy the code block from the matching file under [`../../agents/`](../../agents/) into each Agent's Instructions.
+Add `DevOps` when scope includes CI/CD. Product, page, button, workflow, and UI changes require `ProductManager`; existing PRD / Issue content is still lightly validated and reused by ProductManager. A pure technical task or clearly bounded bug that changes neither product scope, business rules, nor UI may explicitly record `ProductManager N/A` through the Leader. Copy the code block from the matching file under [`../../agents/`](../../agents/) into each Agent's Instructions.
 
 > The Leader doesn't need a separate Agent: `squad.md` is the Leader's behavior config (Multica's Squad Instructions are only injected into the Leader).
 
@@ -132,7 +133,7 @@ Assign the Issue to this Squad.
 The squad automatically walks the workflow above:
 
 ```text
-Issue → [Design] → [parallel artifacts] → [Implementation] → [Testing] → Human
+  Issue → ProductManager → G0 → [UI / technical design] → [parallel artifacts] → [Implementation] → [Testing] → Human
 ```
 
 Every artifact is gated by the Leader with the multica-verification skill; PASS moves it forward. Roles outside the scope are skipped.
@@ -160,7 +161,7 @@ The multica-verification skill is a **soft gate** in the agent world (executed b
 
 ## Why this works
 
-This Starter has 9 roles: the Leader owns orchestration and gatekeeping; ProductManager (product requirement / PRD) turns ideas into reviewable deliverables; Architect (technical) / Designer (UI, platform via `multica-artifact-ui-sync`) / FrontendDev / BackendDev / Tester (T1/T2/T3 three-phase) / DevOps (G2.5 triggers CI/CD) each own a piece of the artifacts, and the **Reviewer does the business review**.
+This Starter has 9 roles: DevelopmentLeader owns orchestration and gatekeeping; ProductManager (product requirement / PRD) is the mandatory first stop for product requests; Architect (technical) / Designer (UI, platform via `multica-artifact-ui-sync`) / FrontendDev / BackendDev / Tester (T1/T2/T3 three-phase) / DevOps (G2.5 triggers CI/CD) each own a piece of the artifacts, and the **Reviewer does the business review**. General-purpose Squads such as `software-development-reviewed` and `bug-fix` can continue using the generic `Leader`.
 Gatekeeping is standardized as [`../../skills/multica-verification/SKILL.md`](../../skills/multica-verification/SKILL.md), executed by the non-producing Leader (executor and gatekeeper are different parties); objective verification that can be machine-run is upgraded to CI hard gates (see [`../../skills/multica-gate-setup/`](../../skills/multica-gate-setup/)).
 **Gates anchor to artifacts, not roles**: the Issue's "affected ends" decides routing; artifacts for missing roles are skipped and the gate chain stays intact — no design / no frontend / no backend / full-stack are all permutations of the same instructions.
 Routing logic is written once (Squad), not copied into every Agent; each Agent has a narrow responsibility and can be copied as-is.

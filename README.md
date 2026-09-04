@@ -17,7 +17,7 @@
 ```text
 你创建：Agent（角色） + Squad（编排） + Skill（做法） + Issue（任务）
                   ↓
-       Leader 带队：需求收敛(G0) → 设计 → 实现 → 测试 → 部署
+       Leader 带队：ProductManager 需求定义 → Leader 按需决定 UI/技术设计 → Leader 最终评审 → 实现 → 测试 → 部署
                   ↓
    每步门禁（multica-verification skill 复跑）→ Human 最终验收
 ```
@@ -33,13 +33,18 @@
 | DevOps | G2 后触发 CI/CD、回传部署 URL | 写业务代码 / 自宣部署成功 |
 | Reviewer | 业务评审（设计 / 关键改动） | 替代客观验证 / 替代人类验收 |
 | Leader | 编排与门禁（用 multica-verification skill） | 亲自实现 / 给自己盖章 |
+| ProductLeader | 产品问题分诊、产品范围收敛、产品评审与开发交接 | 亲自写 PRD / UI / 技术方案 |
+| DevelopmentLeader | 开发任务分诊、技术编排、开发门禁与交接 | 亲自写代码 / 替工程师修改 |
 
 > 注：`software-development-reviewed` Starter 在上述角色之外，为除 Leader、DevOps 外的每个常规产出角色配备了专属 Reviewer（ArchReviewer / DesignReviewer / ProductReviewer / FrontendReviewer / BackendReviewer / TestReviewer），见 Starters 与 [gates-and-evidence](docs/zh_CN/gates-and-evidence.md#两层门禁通用门禁--专业产出物评审)。
+> `Product Design` 使用 `ProductLeader`，`Development` 与 `Software Development` 使用 `DevelopmentLeader`；`Leader` 保留给 `Software Development Reviewed`、`Bug Fix` 和其他通用小队。
 
 ## Starters
 
 | Starter | 用途 | 状态 |
 | --- | --- | --- |
+| [Product Design](./templates/zh_CN/squad/product-design) | 产品功能设计（ProductManager 先行 + 按需 UI / 技术可行性 + ProductLeader 统一评审） | 实验性 |
+| [Development](./templates/zh_CN/squad/development) | 聚焦开发阶段（Leader 按复杂度动态编排 Architect / 前端 / 后端） | 实验性 |
 | [Software Development](./templates/zh_CN/squad/software-development) | 常规功能开发（前后端按范围路由，任意角色可缺失） | 推荐 |
 | [Software Development (Reviewed)](./templates/zh_CN/squad/software-development-reviewed) | 在 Software Development 基础上，每个常规角色配专属 Reviewer，两层门禁（通用门禁 + 专业产出物评审） | 实验性 |
 | [Bug Fix](./templates/zh_CN/squad/bug-fix) | 根因 / 修复 / 回归（按影响面路由，跳过 Architect） | 实验性 |
@@ -52,10 +57,12 @@
 AGENTS.md     ⭐ Agent 入口：项目约定与改动规范
 templates/  ⭐ 从这里开始：可直接复制的全部配置
 ├── zh_CN/              中文模板（默认；复制整个子目录即用）
-│   ├── agents/           共享 Agent Instructions（15 个角色定义：9 常规 + 6 专属 Reviewer）
+│   ├── agents/           共享 Agent Instructions（17 个角色定义：11 常规 + 6 专属 Reviewer）
 │   ├── skills/           共享 Skill（22 个，统一 multica- 前缀：门禁 / 集成 CI / 测试设计 / 需求分析 / 技术设计 / 实现 / 产物编排 / 平台壳 / 6 个专属评审）
 │   │   └── multica-gate-setup/  CI 硬门禁模板随 Skill 自包含（delivery-gate.yml 等）
 │   └── squad/            小队 Starter
+│       ├── product-design/      产品功能设计：ProductManager 先行 + ProductLeader 统一评审
+│       ├── development/          聚焦开发：Leader 按复杂度动态编排
 │       ├── software-development/ 常规开发（squad / issue / README 含工作流）
 │       ├── software-development-reviewed/ 加强版：每角色专属 Reviewer + 两层门禁
 │       └── bug-fix/             最小修复组合（只换编排）
@@ -76,7 +83,7 @@ flowchart TB
     subgraph P0["阶段 0：需求收敛与 G0"]
         direction TB
         L0["@Leader<br/>读取 Issue，判断事实源"]
-        PM["@ProductManager（可选）<br/>multica-requirement-analysis<br/>+ multica-artifact-req-sync<br/>落地平台由 sync skill 决定"]
+        PM["@ProductManager（产品需求固定首站）<br/>multica-requirement-analysis<br/>+ multica-artifact-req-sync<br/>已有内容只做轻量复用校验"]
         REQ[/"需求事实源<br/>PRD 或已有 Issue<br/>G- FR- BR- AC- OP- RISK-"/]
         SCOPE["@Leader<br/>确定范围、在场角色、路由图<br/>声明 deploy branch"]
         OP{"OP- 关闭且范围明确？"}
@@ -213,10 +220,14 @@ flowchart TB
 
 👉 **[`templates/zh_CN/squad/software-development`](./templates/zh_CN/squad/software-development)**
 
+如果要先把想法或业务问题设计成经过评审的产品功能，使用 **[`templates/zh_CN/squad/product-design`](./templates/zh_CN/squad/product-design)**。它使用专属 `ProductLeader`，所有需求先经过 ProductManager，再按复杂度启用 Designer / Architect，由 ProductLeader 统一评审并输出可交给开发小队的产品定义包。
+
+如果只需要专注完成开发阶段，使用 **[`templates/zh_CN/squad/development`](./templates/zh_CN/squad/development)**。它使用专属 `DevelopmentLeader`，复用现有工程 Agent，由 DevelopmentLeader 根据任务复杂度按需启用 Architect、FrontendDev 和 BackendDev，完成开发交接后交给测试或部署运维小队。
+
 你将得到：
 
 - 1 个 Squad Leader（编排 + 门禁）
-- 9 个 Agent：Leader / ProductManager / Architect / Designer / FrontendDev / BackendDev / Tester / Reviewer / DevOps
+- 常规开发 Starter 使用 9 个 Agent；产品与开发 Starter 额外使用 `ProductLeader` / `DevelopmentLeader`
 - 16 个 Skill（其中 multica-verification 是必备门禁 Skill）
 - 1 个 Issue 模板（含「涉及端」范围声明；来源支持「链接型 / 全量自包含」二选一）
 - 1 个软件开发工作流（任意角色可缺失的条件路由，含 G2.5 CI/CD）
@@ -237,7 +248,7 @@ flowchart TB
 | Reviewer | `reviewer.md` |
 | DevOps | `devops.md` |
 
-> `leader.md` 不需要单独建 Agent：Squad Instructions 只注入 Leader，`squad.md` 就是它的行为配置。ProductManager 为可选角色，仅当需求无就绪范围标识时由 Leader 派发。
+> `leader.md` 不需要单独建 Agent：Squad Instructions 只注入 Leader，`squad.md` 就是它的行为配置。产品、页面、按钮、流程和 UI 变化必须先派 ProductManager；已有 PRD / Issue 不能跳过，只做轻量复用校验。纯技术任务或明确 Bug 且不改变产品范围、业务规则和 UI 时，Leader 才能显式记录 `ProductManager N/A`。
 
 ### Step 2 — 创建 Skills
 

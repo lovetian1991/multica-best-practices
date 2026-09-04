@@ -26,7 +26,7 @@ python scripts/trigger_env.py --env dev --service <service> --branch release/<IS
 python scripts/trigger_env.py --env sit --service <service1>,<service2> --branch release/<ISSUE_KEY>-xxx --json
 ```
 
-## 编排（Multica DevOps）
+## 编排（Multica 部署运维专家）
 
 ```bash
 python ../multica-artifact-cicd-sync/scripts/trigger_cicd.py \

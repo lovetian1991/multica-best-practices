@@ -1,4 +1,4 @@
-# multica-artifact-req-sync — Agent notes
+# multica-artifact-req-sync — 智能体 notes
 
 Orchestrator skill — delegates to `multica-platform-confluence` and `multica-platform-jira`.
 

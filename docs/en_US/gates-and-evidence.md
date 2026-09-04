@@ -158,7 +158,7 @@ Requirements and product docs are not only for human review — downstream @Arch
 1. **Stable headings**: heading levels and section names in a doc are fixed, so AI can locate (e.g. "Acceptance Criteria" is always AC-, not "acceptance" today and "pass criteria" tomorrow).
 2. **Stable table columns**: field tables / metric definitions use fixed column names (e.g. "field / type / required / note").
 3. **Numbered rules**: business rules, acceptance criteria, and goals always use G- / FR- / BR- / AC- / KPI- / OP- / RISK- numbering; no unnumbered prose demands.
-4. **Centralized open questions**: all uncertainty goes only into the OP- list, not scattered in the body pretending to be confirmed; OP- must be closed before development.
+4. **Centralized open questions**: all uncertainty goes only into the OP- list, not scattered in the body pretending to be confirmed; only open blocking OP- items must be closed before development, while non-blocking follow-ups travel in the handoff.
 5. **Cross-linked docs**: PRD / prototype notes / metric definitions / acceptance checklist link to each other; don't rely on "that table earlier".
 6. **Conflict source-of-truth**: on conflicting sources, state "which doc is authoritative"; don't leave two contradictory docs unarbitrated.
 7. **Ban vague words**: no "etc. / relevant / appropriate / optimize a bit" that can't be built or accepted; requirements must be testable.

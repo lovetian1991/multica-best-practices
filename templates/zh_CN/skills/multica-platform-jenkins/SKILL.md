@@ -12,18 +12,18 @@ metadata:
     deps: scripts/requirements.txt
 ---
 
-# Platform · Jenkins
+# 平台 · Jenkins
 
-## Purpose
+## 用途
 
 Jenkins **读 + 写**能力：触发 Job、轮询构建、取 `consoleText`、回传构建 URL。
 
 > **跨平台**：Python 3，Windows / Linux 一致。  
-> **参数自动发现**：连 Jenkins API 读取每个 Job 的必填参数，禁止 Agent 硬编码参数名。
+> **参数自动发现**：连 Jenkins API 读取每个 Job 的必填参数，禁止 智能体 硬编码参数名。
 
 默认 Jenkins：`http://<JENKINS_URL>`
 
-## Agent 标准流程（必读）
+## 智能体标准流程（必读）
 
 ```text
 1. 解析 service（jobs-catalog / issue_service_map）+ **deploy branch**（Issue「Git 分支」区块，非 feature）
@@ -35,7 +35,7 @@ Jenkins **读 + 写**能力：触发 Job、轮询构建、取 `consoleText`、�
 
 **参数优先级**：`--param` > **分支 hint**（branchName 等）> **上次 SUCCESS 构建参数** > Jenkins 默认值
 
-## Files
+## 文件
 
 ```text
 multica-platform-jenkins/
@@ -119,7 +119,7 @@ python scripts/trigger_env.py --env sit --service <service> --branch feature/...
 
 ## 为什么有效
 
-Python + Jenkins API 参数发现：不同项目参数名不同，Agent 先 discover 再 trigger，避免写死 branchName。Job 名清单在 `jobs-catalog.yaml`。
+Python + Jenkins API 参数发现：不同项目参数名不同，智能体 先 discover 再 trigger，避免写死 branchName。Job 名清单在 `jobs-catalog.yaml`。
 
 
 

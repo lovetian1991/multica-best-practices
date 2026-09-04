@@ -24,8 +24,8 @@
 | --- | --- | --- |
 | GET | `/api/workspaces` | 当前用户可见的所有 workspace（注意：此接口为全局列表，无需 slug 头） |
 | GET | `/api/agents` | workspace 内 agent 列表 |
-| GET | `/api/agent-run-counts` | 每个 agent 的 30 天运行次数（Agents 列表 RUNS 列） |
-| GET | `/api/agent-activity-30d` | 每个 agent 的 30 天日活（Agents 列表 ACTIVITY 迷你图数据源） |
+| GET | `/api/agent-run-counts` | 每个 agent 的 30 天运行次数（智能体 列表 RUNS 列） |
+| GET | `/api/agent-activity-30d` | 每个 agent 的 30 天日活（智能体 列表 ACTIVITY 迷你图数据源） |
 
 ## 响应结构（源码确认）
 

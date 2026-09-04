@@ -10,8 +10,36 @@
 | Multi-stage task (design → implement → review → test) | Use a Squad + Starter |
 | Urgent production failure | bug-fix Starter |
 | Research / technical investigation | See technical-research (below) |
+| Product-feature design and review only | `product-design` Starter with composable product / UI / feasibility roles |
+| Development phase only | `development` Starter, dynamically staffed by the Leader |
 
 Principle: **if a single Agent can do it, don't add a Squad.** The value of a Squad is cross-stage coordination, not "the more the merrier."
+
+## Dynamic staffing and review for product design
+
+`templates/en_US/squad/product-design` uses ProductManager as the first step for every request, with ProductLeader owning the unified review. It adds Designer for pages and interactions, and Architect for cross-system, data, permission, or costly constraints only when needed.
+
+```text
+L1 product definition → ProductLeader + ProductManager
+L2 experience design → L1 + Designer
+L3 complex product → L1 + optional Designer and/or Architect
+```
+
+After ProductManager finishes, ProductLeader decides whether Designer / Architect are needed. If needed, they are dispatched without an intermediate formal review. After all required outputs are complete, ProductLeader uses `multica-verification` for one final unified review. A Human confirms scope before the product definition package moves to `development` or the full `software-development` Starter.
+
+## Dynamic staffing for development
+
+`templates/en_US/squad/development` is an independent Squad for the development phase. It reuses the existing Leader, Architect, FrontendDev, and BackendDev without treating all four roles as mandatory for every task.
+
+The Leader reads the Issue and existing code during T0 and judges complexity:
+
+```text
+L1 simple → Leader + one relevant engineer
+L2 medium → Leader + relevant engineer(s), Architect as needed
+L3 high risk → Leader + Architect + relevant engineer(s)
+```
+
+After development handoff, the package can go to a QA or deployment/operations Squad. Use the `software-development` Starter when the task needs the complete design, implementation, testing, and deployment chain.
 
 ## Start from the smallest combination
 

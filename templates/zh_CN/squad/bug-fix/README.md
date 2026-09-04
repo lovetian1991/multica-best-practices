@@ -1,7 +1,7 @@
-# Bug Fix Starter
+# Bug 修复小队启动模板
 
-> 最小小队组合：**Bug 修复不需要经过 Architect。**
-> 复用 [`../../agents/`](../../agents/) 的 Agents（Leader / FrontendDev / BackendDev / Tester / Reviewer），只换编排。
+> 最小小队组合：**Bug 修复不需要经过 技术架构师。**
+> 复用 [`../../agents/`](../../agents/) 的 智能体（通用小队负责人 / 前端开发专家 / 后台开发专家 / 测试专家 / 业务评审），只换编排。
 
 ## 流程
 
@@ -9,59 +9,59 @@
 Bug Issue
   ↓ 确定影响面（前端? 后端?）
   ↓
-FrontendDev / BackendDev（按影响面）
+前端开发专家 / 后台开发专家（按影响面）
   复现 → 根因 → 修复 + 回归测试
   ↓
-Leader（multica-verification skill）
+通用小队负责人（multica-verification skill）
   独立复跑验证
   ├─ FAIL → 回对应实现者
   └─ PASS ↓
   ↓
-Reviewer（业务评审，必要时）
+业务评审（业务评审，必要时）
   ↓
-Human
-  验收 → Done
+人类
+  验收 → 完成
 ```
 
 ## 阶段分工
 
 | 阶段 | 负责人 | 产出 | 检查人 |
 | --- | --- | --- | --- |
-| 复现 | Frontend / BackendDev | 可复现步骤 + 根因 | — |
-| 修复 | Frontend / BackendDev | 最小范围修复 + 回归测试 | — |
-| 验证 | Leader | 独立复跑结论（PASS / FAIL） | Leader（multica-verification skill） |
-| 评审 | Reviewer | 业务风险判断（必要时） | Reviewer |
-| 验收 | Human | 上线 / Done 决策 | Human |
+| 复现 | 前端开发专家 / 后台开发专家 | 可复现步骤 + 根因 | — |
+| 修复 | 前端开发专家 / 后台开发专家 | 最小范围修复 + 回归测试 | — |
+| 验证 | 通用小队负责人 | 独立复跑结论（PASS / FAIL） | 通用小队负责人（multica-verification skill） |
+| 评审 | 业务评审 | 业务风险判断（必要时） | 业务评审 |
+| 验收 | 人类 | 上线 / 完成决策 | 人类 |
 
 ## 与 software-development 的区别
 
-| 环节 | Software Development | Bug Fix |
+| 环节 | 软件开发小队 | Bug 修复小队 |
 | --- | --- | --- |
-| 设计 | Architect 先设计 | 跳过，先复现 + 定位根因 |
-| 实现 | Frontend / BackendDev（按范围） | Frontend / BackendDev（按影响面） |
-| 判门 | Leader 用 multica-verification skill（G1–G3） | Leader 用 multica-verification skill 复跑修复验证 |
-| 测试 | Tester 全量验收 | 针对性的回归测试 |
-| 验收 | Human | Human |
+| 设计 | 技术架构师 先设计 | 跳过，先复现 + 定位根因 |
+| 实现 | 前端开发专家 / 后台开发专家（按范围） | 前端开发专家 / 后台开发专家（按影响面） |
+| 判门 | 研发总监 用 multica-verification skill（G1–G3） | 通用小队负责人 用 multica-verification skill 复跑修复验证 |
+| 测试 | 测试专家 全量验收 | 针对性的回归测试 |
+| 验收 | 人类 | 人类 |
 
-## 为什么没有 Architect
+## 为什么没有 技术架构师
 
 Bug 的目标是「恢复正确行为」，不是「引入新能力」。多一个设计角色只会拖慢修复、增加上下文损耗。
 
 这正体现了本仓库的核心原则：
 
-> **最佳实践不是固定的五 Agent 流程，而是针对不同任务选择最小的 Agent 组合。**
+> **最佳实践不是固定的五个智能体流程，而是针对不同任务选择最小的智能体组合。**
 
 ## 上手
 
-1. 按 [`../../agents/`](../../agents/) 创建 Agents：Leader / FrontendDev / BackendDev / Tester / Reviewer。
-2. 复制共享判门 Skill：[`../../skills/multica-verification/SKILL.md`](../../skills/multica-verification/SKILL.md) 挂给 **Leader**（本 Starter 只依赖这一个 Skill）。
-3. 把本目录 [`squad.md`](./squad.md) 复制到 Squad Instructions（覆盖默认编排）。
+1. 按 [`../../agents/`](../../agents/) 创建 智能体：通用小队负责人 / 前端开发专家 / 后台开发专家 / 测试专家 / 业务评审。
+2. 复制共享判门 Skill：[`../../skills/multica-verification/SKILL.md`](../../skills/multica-verification/SKILL.md) 挂给 **通用小队负责人**（本启动模板 只依赖这一个 Skill）。
+3. 把本目录 [`squad.md`](./squad.md) 复制到小队提示词（覆盖默认编排）。
 4. 用 [`issue.md`](./issue.md) 创建 Bug Issue。
-5. 分配给 Squad。
+5. 分配给小队。
 
 ## 重要提醒
 
-修复类任务尤其容易「为了快速上线而跳过验证」。CI、回归测试、人类审批这些硬约束必须留在工程系统里，不要只靠 Agent 自觉。
+修复类任务尤其容易「为了快速上线而跳过验证」。CI、回归测试、人类审批这些硬约束必须留在工程系统里，不要只靠 智能体 自觉。
 
 ## 何时使用
 

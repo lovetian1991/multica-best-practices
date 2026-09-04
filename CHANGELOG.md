@@ -3,6 +3,119 @@
 All notable changes to this project will be documented in this file.
 本文件记录本项目的所有重要变更。新条目采用中英结合写法（Chinese-first, English alongside）。
 
+## Unreleased - 2026-09-03 · 产品小队按需角色依赖 / Product Squad on-demand role dependencies
+
+### Changed / 变更
+
+- 解决产品小队“技术架构师必须等待 UI/UE设计师”与“技术架构师按需启用”之间的冲突：仅启用技术架构师时，产品经理完成后即可开始；UI/UE设计师 与技术架构师同时启用时，才按 UI/UE设计师 → 技术架构师 顺序补写同一份 PRD / Resolved the conflict between “Architect must wait for Designer” and on-demand staffing: Architect starts after ProductManager when Architect is the only downstream role, and waits for Designer only when both roles are enabled
+- 统一产品小队、产品总监、技术架构师、需求分析 Skill 及中英文 README 的依赖规则，避免共享 PRD 并发修改和错误阻塞 / Aligned the dependency rules across the Product Squad, ProductLeader, Architect, requirement-analysis Skill, and bilingual READMEs to prevent concurrent edits and false blocking on the shared PRD
+
+## Unreleased - 2026-09-02 · 产品小队单一 PRD 交付 / Product Squad single-PRD delivery
+
+### Changed / 变更
+
+- 纠正线上 `DevelopmentLeader` 的显示名和身份：统一为“研发总监”；开发小队及软件开发小队中的专属编排、门禁和交接职责不再写成通用“小队负责人” / Corrected the production `DevelopmentLeader` display name and identity to “研发总监”; development-specific staffing, gates, and handoff now consistently use the dedicated role instead of the generic Leader
+- 中文化 Agent / Squad 名称、描述、教程、Issue 模板和 Skill 自然语言标题；`ProductLeader` 统一为“产品总监”，`Leader` 保留为“通用小队负责人” / Localized Agent and Squad names, descriptions, tutorials, Issue templates, and natural-language Skill headings; `ProductLeader` is “产品总监”, while `Leader` remains “通用小队负责人”
+- `Designer` 线上显示名统一为“UI/UE设计师”；“界面与交互设计师”仅作为历史对象名称保留，不再作为新对象名称 / Standardized the production `Designer` display name as “UI/UE设计师”; “界面与交互设计师” remains only as a legacy object name and is never used for new objects
+- 新增 `scripts/agent-names.ps1` 作为线上 Agent 显示名称的唯一标准配置；导入脚本按中文标准名复用对象，并可将旧逻辑名迁移为标准名 / Added `scripts/agent-names.ps1` as the single source of truth for production Agent display names; the importer reuses canonical Chinese objects and can rename legacy logical objects
+- 产品小队统一使用按中文功能名称命名的唯一正式交付物 `prd-<功能名称>.md`，固定详细功能清单、前置条件、主流程、分支流程、异常流程、边界条件和 AC-；同一功能后续变更更新原文件 / The Product Design Squad now uses one official feature-named deliverable `prd-<feature-name>.md` with a short readable Chinese feature name, fixed feature inventory, preconditions, main / branch / error flows, boundary conditions, and ACs; later changes to the same feature update the existing file
+- ProductManager、Designer、Architect 按 ProductLeader 指定顺序补写同一份功能 PRD，ProductLeader 只做最终统一评审 / ProductManager, Designer, and Architect append to the same feature PRD in ProductLeader's sequence, and ProductLeader performs the only final unified review
+- 导入脚本支持线上中文 Agent / Squad 别名，更新已有“产品总监”“产品经理”“产品小队”等对象而不创建英文重复对象 / The import script resolves localized Agent / Squad aliases so existing objects such as “产品总监”, “产品经理”, and “产品小队” are updated without English duplicates
+- 导入脚本按目标定义收敛小队 Agent 成员，移除“开发小队”和“软件开发小队”中历史归档的 `FrontendDev`、`BackendDev`、`Tester` 成员，并将最终统计改为实际对象数 / Squad import now converges Agent membership to the target definition, removing archived `FrontendDev`, `BackendDev`, and `Tester` members from “开发小队” and “软件开发小队”; final counts now report unique objects
+
+## Unreleased - 2026-09-01 · 产品小队最终评审路由 / Product Squad final-review routing
+
+### Changed / 变更
+
+- ProductManager 完成后，ProductLeader 只判断是否继续启用 Designer / Architect；需要继续时不做中间正式评审，所有适用产物完成后只做一次最终统一评审 / After ProductManager finishes, ProductLeader only decides whether Designer / Architect are needed; when more work is needed there is no intermediate formal review, and one final unified review happens after all applicable outputs are complete
+- 若不需要 Designer / Architect，ProductLeader 直接对 ProductManager 产物做最终评审并结束产品小队流程 / When no Designer / Architect is needed, ProductLeader directly performs the final review of the ProductManager output and ends the Product Squad flow
+
+## Unreleased - 2026-09-01 · 产品小队首派顺序固化 / ProductManager-first dispatch ordering
+
+### Changed / 变更
+
+- 产品设计小队明确 ProductLeader 完成必要 P0 分诊后，第一时间只能派 ProductManager；产品定义通过 ProductLeader 评审前不得派 Designer、Architect 或开发小队 / Product Design Squad now hardens the first dispatch: after necessary P0 triage, ProductLeader must dispatch ProductManager first, and cannot dispatch Designer, Architect, or a development Squad before the product definition passes ProductLeader review
+- 中英文产品设计 README 流程图同步展示 ProductManager 首站、按需启用 Designer / Architect 和 ProductLeader 最终统一 Review / Bilingual product-design README flow diagrams now show ProductManager first, on-demand Designer / Architect activation, and ProductLeader's final unified review
+
+## Unreleased - 2026-09-01 · 产品需求固定前置 / ProductManager-first requirement flow
+
+### Changed / 变更
+
+- 产品、页面、按钮、流程和 UI 变化统一先经过 ProductManager，再由 Leader 进行 G0 评审，之后才允许 UI / 技术设计和开发；已有 PRD / Issue 只做轻量复用校验，不再作为跳过 ProductManager 的理由 / Product, page, button, workflow, and UI changes now always pass through ProductManager first, then Leader G0 review, before UI / technical design and development; existing PRD / Issue content is lightly reused and validated, not used to bypass ProductManager
+- 开发小队明确只接收产品定义包、明确 Bug 或纯技术任务；未经过产品定义的产品 / UI 需求会 BLOCKED 并退回产品小队 / The Development Squad now accepts only product-definition packages, clearly bounded bugs, or pure technical tasks; undefined product / UI requests are BLOCKED and returned to the Product Squad
+- 纯技术任务和明确 Bug 的 ProductManager 例外必须由 Leader 显式记录 `ProductManager N/A` 及理由，避免静默绕过流程 / The ProductManager exception for pure technical tasks and clear bugs must be explicitly recorded by the Leader as `ProductManager N/A` with a reason, preventing silent bypasses
+
+## Unreleased - 2026-09-01 · 产品小队单一评审 / Product Squad single-review model
+
+### Changed / 变更
+
+- 产品小队移除 ProductReviewer、DesignReviewer、ArchReviewer，由 ProductLeader 统一评审产品定义、UI / 交互和技术方案 / Product Design Squad removes ProductReviewer, DesignReviewer, and ArchReviewer; ProductLeader now reviews the product definition, UI / interaction, and technical design
+- 产品小队明确所有需求必须先经过 ProductManager，Designer / Architect 仅在 ProductLeader 判断需要时启用 / Product Design Squad now requires ProductManager first for every request; Designer / Architect activate only when ProductLeader decides they are needed
+- 导入脚本会从现有 Product Design Squad 主动移除三个已退役 Reviewer 成员，降低调用次数、重复上下文和 Token 消耗 / The import script removes the three retired Reviewer members from an existing Product Design Squad, reducing calls, repeated context, and token usage
+
+## Unreleased - 2026-08-31 · 取消任务补偿 / Cancellation compensation
+
+### Added / 新增
+
+- 新增 `scripts/watch-cancelled-issues.ps1`：轮询已取消 Issue，并调用官方 `multica issue cancel-task` 中断仍处于排队或运行中的任务；支持 `-Once` 单次检查 / Added `scripts/watch-cancelled-issues.ps1` to poll cancelled Issues and invoke the official `multica issue cancel-task` command for queued or running tasks; supports a one-shot `-Once` check
+
+### Changed / 变更
+
+- 产品、开发 Leader、ProductManager 和两个相关 Squad 模板增加取消保护：重新读取 Issue 状态，取消后不再派单、回写、恢复状态或触发后续流程 / Product and development Leaders, ProductManager, and the two related Squad templates now re-check Issue status and stop dispatch, writes, status revival, and downstream flow after cancellation
+- 导入脚本优先使用 PATH 中可用的 `multica` CLI，再回退到默认安装路径，兼容自定义 CLI 安装位置 / The import script now prefers the `multica` CLI found on PATH and falls back to the default installation path, supporting custom CLI locations
+
+## Unreleased - 2026-08-31 · 产品小队成本控制 / Product Squad Cost Control
+
+### Changed / 变更
+
+- 产品小队与 `ProductLeader` 增加按 L1 / L2 / L3 分档的调用策略：非活跃 Agent 不启动，简单任务不自动启用 Designer、Architect 及其 Reviewer / Product Squad and `ProductLeader` now use L1 / L2 / L3 call profiles: inactive Agents do not start, and simple tasks do not automatically activate Designer, Architect, or their Reviewers
+- 增加任务摘要包与稳定引用规则，禁止每次派活默认复制完整聊天历史、完整 PRD 或无关产物；Reviewer 只检查本次变化及受影响的 AC- / Added task-capsule and stable-reference rules; dispatches no longer default to copying full chat history, full PRDs, or unrelated artifacts, and Reviewers inspect only the current delta and affected ACs
+- 增加按复杂度的返工上限与受影响范围失效规则：L1 一轮、L2 两轮、L3 三轮，超限升级人类，避免 Agent 内部循环放大 token / Added complexity-based rework limits and impact-scoped invalidation: one round for L1, two for L2, and three for L3 before Human escalation, preventing internal Agent loops from multiplying token usage
+
+## Unreleased - 2026-08-31 · OP- 分级与阻塞控制 / OP- classification and blocking control
+
+### Changed / 变更
+
+- 产品小队、`ProductLeader`、`ProductManager`、`ProductReviewer` 和 `multica-requirement-analysis` 现在要求将 OP- 分为阻塞项与非阻塞跟进项；只有影响当前范围、业务规则、权限 / 数据口径、AC- 或安全合规的事项才阻塞评审 / 交接 / Product Design and its product roles now classify OP- items as blocking or non-blocking follow-ups; only issues affecting current scope, business rules, permission / data definitions, AC-, or security/compliance block review or handoff
+- 非阻塞跟进项仍需显式记录负责人和后续时点（如适用），但不会因为 OP- 未全部关闭而让整份 PRD 或轻量产品变更说明 FAIL / Non-blocking follow-ups remain visible with an owner and timing when applicable, but an artifact no longer fails merely because every OP- is not closed
+
+## Unreleased - 2026-08-31 · 产品小队渐进式澄清 / Progressive Product Triage
+
+### Changed / 变更
+
+- `ProductLeader` 与 Product Design Squad 改为“先复用、再补缺、按复杂度展开”：L1 使用精简产品变更说明并保留独立评审，L2 / L3 才按需展开完整 PRD；每轮最多追问 3 个阻塞问题，不相关字段不再阻塞 / ProductLeader and Product Design Squad now reuse existing requirements, fill only blocking gaps, and expand by complexity: L1 uses a compact reviewed change note, while L2 / L3 expand the applicable PRD sections; each round asks at most three blocking questions and irrelevant fields do not block
+
+## Unreleased - 2026-08-31 · 专属领域 Leader / Domain-specific Leaders
+
+### Added / 新增
+
+- 新增 `ProductLeader` 与 `DevelopmentLeader` Agent Instructions，分别面向产品范围收敛 / 产品评审，以及开发分诊 / 技术编排 / 开发交接 / Added dedicated ProductLeader and DevelopmentLeader Agent Instructions for product convergence and review, and development triage, technical staffing, and handoff
+
+### Changed / 变更
+
+- 导入脚本现在会同步两个专属 Leader 的 Instructions、描述和 Skills，并从目标小队移除旧通用 Leader 成员；`Product Design` 使用 `ProductLeader`，`Development` 与 `Software Development` 使用 `DevelopmentLeader`，通用 `Leader` 保留给其他小队 / The import script now syncs both dedicated Leaders and removes the old generic Leader from target Squads; Product Design uses ProductLeader, Development and Software Development use DevelopmentLeader, while the generic Leader remains available to other Squads
+- 双语 README、Starter README 与 AGENTS 结构说明同步更新 Agent 数量和各小队 Leader 归属 / Bilingual READMEs, Starter READMEs, and the AGENTS structure now document the Agent count and per-Squad Leader ownership
+
+## Unreleased - 2026-08-31 · 聚焦开发小队 / Development-focused Squad
+
+### Added / 新增
+
+- 新增 `templates/zh_CN|en_US/squad/development` Starter：复用现有 Leader、Architect、FrontendDev、BackendDev，专注开发阶段 / Added a development-focused Starter reusing the existing Leader, Architect, FrontendDev, and BackendDev
+- 新增 Leader 动态编排规则：按 L1/L2/L3 复杂度按需启用成员，完成开发交接后交给测试或部署运维小队 / Added Leader-driven L1/L2/L3 staffing with downstream handoff after development
+- 新增 `templates/zh_CN|en_US/squad/product-design` Starter：复用 ProductManager、Designer、Architect 及对应专属 Reviewer，设计各种产品功能 / Added a product-feature-design Starter reusing ProductManager, Designer, Architect, and their dedicated Reviewers
+- 新增产品产物双层评审：Leader 通用门禁 + ProductReviewer / DesignReviewer / ArchReviewer 专业评审 / Added two-layer product artifact review with a Leader general gate and dedicated professional Reviewers
+
+### Changed / 变更
+
+- 根 README、双语 adapt-and-scale 方法论、AGENTS 结构和 ROADMAP 增加 Development 与 Product Design Starter 入口 / Added the Development and Product Design Starters to root READMEs, bilingual adapt-and-scale guidance, AGENTS structure, and ROADMAP
+
+## Unreleased - 2026-08-28 · Multica Agent 中文备注 / Chinese Agent descriptions
+
+### Changed / 变更
+
+- `scripts/import-to-multica.ps1`：将导入的 15 个 Agent 默认备注改为中文，并同步更新目标工作区中的对应 Agent 描述 / Changes the default descriptions for the 15 imported Agents to Chinese and syncs them to the target workspace
+- `scripts/import-to-multica.ps1`：将三套正式 Squad 的默认备注改为中文 / Changes the default descriptions for the three official Squads to Chinese
+
 ## v0.0.10 - 2026-08-22 · 全量 Review 修复：一致性/双语文档同步 / Full-review fixes: consistency & bilingual sync
 
 ### Changed / 变更
