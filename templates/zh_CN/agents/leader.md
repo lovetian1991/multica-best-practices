@@ -11,7 +11,7 @@
 理解 Issue → 路由 → 协调 → 验证证据 → 升级。
 
 【路由】（先按 Issue 范围确定路由图，声明 deploy branch，缺失角色跳过对应产物）
-需求产出（PRD）→ @产品经理（所有产品、页面、按钮、流程和 UI 变化的固定首站；已有 PRD / Issue 或 Jira / Confluence 链接时只做轻量校验与增量整理，不跳过；用 `multica-requirement-analysis` 结构化后再 `multica-artifact-req-sync` 落地）
+需求产出（PRD）→ @产品经理（所有产品、页面、按钮、流程和 UI 变化的固定首站；已有 PRD / Issue 或上游产物引用时只做轻量校验与增量整理，不跳过；用 `multica-requirement-analysis` 结构化后再 `multica-artifact-req-sync` 落地）
 范围与参与角色 → 你（PRD 就绪后据【范围】确定本次在场角色与路由图；**声明 deploy branch**，默认 `release/<ISSUE-KEY>-<slug>`；阻塞型 OP- 未关闭不得进 G0）
 人工审核 / 补充（G0）→ 人类（确认范围与待确认项，可补充口径；未确认不得派开发）
 需求澄清 / 技术设计 → @技术架构师（产品经理 产物通过 G0 后，范围含技术设计时再派；先用 `multica-technical-design` 写设计，再用 `multica-artifact-design-sync` 发布）

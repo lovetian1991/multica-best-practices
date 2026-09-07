@@ -1,17 +1,17 @@
 # multica-artifact-cicd-sync 使用说明
 
-CICD 落地编排 skill：把代码评审结论转为 Jenkins 触发参数，调用 **`multica-platform-jenkins`** 跑构建 / 发布。
+CICD 落地编排 skill：把代码评审结论转为 Jenkins 触发参数，调用 **`multica-platform-jenkins`** 跑构建 / 发布；可调用 **`multica-platform-opencontent`** 保存构建证据。Issue 数据和评论由 Multica 保存。
 
 ## 1. 前置依赖
 
-- 已挂载 `multica-platform-jenkins`（提供 Jenkins URL 与凭据）。
+- 已挂载 `multica-platform-jenkins`（提供 Jenkins URL 与凭据）。需要保存证据时再挂载 `multica-platform-opencontent`。
 - 本 Skill 的 `config.yaml` 中 `issue_service_map` 为占位示例，请按你的「Issue 前缀 → 触发服务」映射填写。
 
 ## 2. 配置
 
 ```bash
 cp .env.example .env
-# 通常无需额外变量；Jenkins 凭据由 multica-platform-jenkins/.env 提供
+# 通常无需额外变量；Jenkins 凭据由 multica-platform-jenkins/.env 提供，OpenContent 凭据由平台 Skill 运行环境提供
 ```
 
 ## 3. 安装依赖
@@ -33,3 +33,4 @@ pip install -r requirements.txt   # 仅 requests
 
 - `config.yaml` 的 `issue_service_map` 前缀（`<ISSUE_PREFIX_A>` 等）为占位，请按你的团队习惯替换。
 - 真实 Jenkins 地址 / job 名请放在 `multica-platform-jenkins` 中，本 Skill 不持有基建信息。
+- `cicd` 证据文件通过 `multica-platform-opencontent` 上传；返回的 `metadata_patch` 和 `comment` 写入 Multica Issue。

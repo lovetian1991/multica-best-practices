@@ -1,52 +1,31 @@
-#!/bin/bash
-# PRD 编排：Confluence 页面 + JIRA Story + 可选钉钉
-# 依赖 multica-platform-confluence / multica-platform-jira（MULTICA_SKILLS_ROOT 或同级目录）
+#!/usr/bin/env bash
+# Publish one PRD through multica-platform-opencontent.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILL_DIR="$(dirname "$SCRIPT_DIR")"
-# shellcheck source=resolve_skills.sh
-source "$SCRIPT_DIR/resolve_skills.sh"
-CONFLUENCE_SKILL="$(resolve_skill_dir multica-platform-confluence "$SKILL_DIR")"
-JIRA_SKILL="$(resolve_skill_dir multica-platform-jira "$SKILL_DIR")"
+ROOT="${MULTICA_SKILLS_ROOT:-$(dirname "$SKILL_DIR")}"
+OPENCONTENT_SKILL="${ROOT}/multica-platform-opencontent"
 
 usage() {
-  echo "Usage: $0 --project KEY --summary TITLE --html-file FILE [jira options passed to create-story]"
+  echo "Usage: $0 --workspace SLUG --issue ISSUE-KEY --file PATH [--root-folder-id ID] [--reference JSON]"
   exit 1
 }
 
-PROJECT="" SUMMARY="" HTML_FILE=""
-JIRA_ARGS=()
-
+WORKSPACE=""; ISSUE=""; ROOT_FOLDER=""; FILE=""; REFERENCE=""
 while [ $# -gt 0 ]; do
   case "$1" in
-    --project) PROJECT="$2"; shift 2 ;;
-    --summary) SUMMARY="$2"; shift 2 ;;
-    --html-file) HTML_FILE="$2"; shift 2 ;;
-    --) shift; JIRA_ARGS+=("$@"); break ;;
-    *) JIRA_ARGS+=("$1"); shift ;;
+    --workspace) WORKSPACE="$2"; shift 2 ;;
+    --issue) ISSUE="$2"; shift 2 ;;
+    --root-folder-id) ROOT_FOLDER="$2"; shift 2 ;;
+    --file) FILE="$2"; shift 2 ;;
+    --reference) REFERENCE="$2"; shift 2 ;;
+    *) usage ;;
   esac
 done
+[ -n "$WORKSPACE" ] && [ -n "$ISSUE" ] && [ -f "$FILE" ] || usage
 
-[ -n "$PROJECT" ] && [ -n "$SUMMARY" ] && [ -f "$HTML_FILE" ] || usage
-
-PARENT=$(python3 -c "import yaml; c=yaml.safe_load(open('$CONFLUENCE_SKILL/config.yaml')); print(c['confluence']['default_parent_page_id'])")
-SPACE=$(python3 -c "import yaml; c=yaml.safe_load(open('$CONFLUENCE_SKILL/config.yaml')); print(c['confluence']['default_space'])")
-HTML=$(cat "$HTML_FILE")
-
-PAGE_JSON=$(bash "$CONFLUENCE_SKILL/scripts/confluence.sh" create-page "$SUMMARY" "$PARENT" "$HTML" "$SPACE")
-PAGE_ID=$(echo "$PAGE_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))" 2>/dev/null || true)
-PAGE_URL=$(echo "$PAGE_JSON" | python3 -c "
-import sys,json
-d=json.load(sys.stdin)
-links=d.get('_links',{})
-base=links.get('base','').rstrip('/')
-web=links.get('webui','')
-print(base+web if web else '')
-" 2>/dev/null || true)
-
-DESC="h1. Requirement Document\n\nConfluence: ${PAGE_URL}\n"
-JIRA_OUT=$(bash "$JIRA_SKILL/scripts/jira.sh" create-story --project "$PROJECT" --summary "$SUMMARY" --description "$DESC" "${JIRA_ARGS[@]}")
-echo "$JIRA_OUT"
-echo "Confluence: $PAGE_URL"
-echo "PageId: $PAGE_ID"
+ARGS=("$OPENCONTENT_SKILL/scripts/publish-artifact.py" --type requirement --workspace "$WORKSPACE" --issue "$ISSUE" --file "$FILE" --json)
+[ -n "$ROOT_FOLDER" ] && ARGS+=(--root-folder-id "$ROOT_FOLDER")
+[ -n "$REFERENCE" ] && ARGS+=(--reference "$REFERENCE")
+exec python3 "${ARGS[@]}"

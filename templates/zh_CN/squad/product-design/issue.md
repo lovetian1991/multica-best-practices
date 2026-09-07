@@ -7,7 +7,7 @@
 
 ## Issue 来源（必填，二选一）
 - [ ] 外部系统链接（轻量）
-      - 链接：https://jira.example.com/browse/<ISSUE-KEY>
+      - 链接：<ISSUE_URL>
       - 摘要：<!-- 一句话说明产品问题或机会 -->
 - [ ] 全量自包含（默认）
 

@@ -1,29 +1,18 @@
 # multica-artifact-req-sync
 
-PRD 落地编排 skill：调用 **`multica-platform-confluence`** + **`multica-platform-jira`**，不重复维护 REST 脚本。
+PRD 文件编排 Skill：调用 `multica-platform-opencontent` 上传或更新文件，并回传 `internal_link`。Issue 数据和评论保存在 Multica，不依赖 Jira。
 
 ## 快速开始
 
-1. 复制本目录 + 两个平台层技能到 Multica 技能目录（或设置 `MULTICA_SKILLS_ROOT` 指向 `templates/skills/`）。
-2. 配置凭据（workspace 域账号优先）：
+1. 挂载本目录和 `multica-platform-opencontent`，设置 `MULTICA_SKILLS_ROOT`。
+2. 配置平台 Skill 的 `OC_CLI_PATH`、`MULTICA_SERVER_URL` 和 `OPENCONTENT_APIKEY`。
+3. 在 `multica-platform-opencontent/config.yaml` 设置根目录和允许列表。
 
 ```bash
-cp ../multica-platform-confluence/.env.example ../multica-platform-confluence/.env
-cp ../multica-platform-jira/.env.example ../multica-platform-jira/.env
+python "$MULTICA_SKILLS_ROOT/multica-platform-opencontent/scripts/publish-artifact.py" \
+  --type requirement --workspace <WORKSPACE_SLUG> --issue <ISSUE-KEY> \
+  --file docs/requirements/<ISSUE-KEY>/prd-login.md \
+  --root-folder-id <ROOT_FOLDER_ID> --json
 ```
 
-3. 团队落点：
-- Confluence PRD 父页面：`multica-platform-confluence/config.yaml`
-- JIRA 字段 / 项目：`multica-platform-jira/config.yaml`
-
-## 编排脚本
-
-```bash
-export MULTICA_SKILLS_ROOT="/path/to/templates/skills"
-bash scripts/publish-prd.sh --project <PROJECT_A> --summary "标题" --html-file prd.html \
-  -- --need-user user --background "..."
-```
-
-## 文档
-
-见 `SKILL.md`；平台层命令详见 `multica-platform-confluence` 与 `multica-platform-jira` 的 SKILL.md（按技能名挂载，勿写死路径）。
+返回 JSON 中的 `metadata_patch` 写入 Issue metadata，`comment` 追加为 Issue 评论。更新固定使用 `fileModel=UPDATE` 和 `strategy=majorUpgrade`。

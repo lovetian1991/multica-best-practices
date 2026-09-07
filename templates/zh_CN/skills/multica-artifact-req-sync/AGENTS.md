@@ -1,6 +1,6 @@
 # multica-artifact-req-sync — 智能体 notes
 
-- Orchestrates `multica-platform-confluence` + `multica-platform-jira`; do not duplicate REST scripts here.
+- Orchestrates `multica-platform-opencontent`; do not duplicate OpenContent REST scripts here.
 - Resolve platform paths via `scripts/resolve_skills.sh` or `MULTICA_SKILLS_ROOT`.
-- Credential priority: `ATLASSIAN_USER/ATLASSIAN_PASS` → skill `.env`.
+- Return the platform JSON so the caller can write Multica Issue metadata and comments.
 

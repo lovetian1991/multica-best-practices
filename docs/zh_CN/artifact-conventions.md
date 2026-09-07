@@ -4,7 +4,7 @@
 
 ## 1. 核心原则：内容归角色，平台归 skill
 
-- **角色提示词只描述"产出什么内容"**（如 PRD 含哪些段落、API 契约含哪些字段），**不出现任何具体平台名**（Figma / Confluence / Apifox / Jira 等）。
+- **角色提示词只描述"产出什么内容"**（如 PRD 含哪些段落、API 契约含哪些字段），**不出现具体文件平台名**；Issue 与 CI 平台由各自适配层负责。
 - **落盘 / 上传 / 取回由 `multica-artifact-*-sync` 系列 skill 负责**。每个角色在提示词里只写一句"用 `multica-artifact-xxx-sync` skill 落地"，具体平台在该 skill 内实现，可替换。
 - **稳定引用 = 链接或路径**：下游通过 skill 回传的链接 / 路径定位上游产物，而不是靠"你应该知道上游产了啥"。
 
@@ -72,7 +72,7 @@
 
 ## 6. 平台替换（不改角色提示词）
 
-团队换平台时，只改对应的 `multica-artifact-*-sync` skill 的「默认平台」段，把 Figma / Confluence / Apifox / Jira 换成你们的工具（蓝湖 / 语雀 / Swagger / TestRail 等），保持「上传 + 回传稳定引用」接口不变。全部角色提示词与 squad 指令**无需改动**。
+当前文件产物统一由 `multica-platform-opencontent` 通过 `oc-basic` 管理；Issue 状态、字段和评论由 Multica 自身保存，CI/CD 触发由独立 CI 平台负责。替换文件平台时只改平台 Skill 和对应 artifact-sync，保持“上传/更新 + 回传稳定 internal_link”接口不变。角色提示词与 Squad 指令不写平台细节。
 
 ## 7. 常见错误
 

@@ -1,34 +1,22 @@
 ---
 name: multica-artifact-test-sync
-description: 把测试用例 / 测试报告产物对接到用例管理平台（默认本地 XMind 转 Jira）。用于 @测试专家 上传用例、回传链接，供验收下游消费。平台可替换。
+description: 将测试用例和测试报告文件上传或更新到 OpenContent，并回传稳定 internal_link 供验收消费。
+metadata:
+  orchestrates:
+    - multica-platform-opencontent
 ---
 
 # 产物 · 测试用例同步
 
-## 用途
+用例需覆盖正常、边界、异常、空态和无权限态，并逐条对应 PRD 的 AC-。将用例和报告分别写入本地文件，单文件调用平台层：
 
-把测试用例 / 测试报告落地到团队统一的用例管理平台，并让下游（验收 / 业务评审）用稳定方式取回。
+```bash
+python "$MULTICA_SKILLS_ROOT/multica-platform-opencontent/scripts/publish-artifacts.py" \
+  --type test-cases --workspace <WORKSPACE_SLUG> --issue <ISSUE-KEY> \
+  --file docs/test-cases/<ISSUE-KEY>/cases.md --root-folder-id <ROOT_FOLDER_ID> --json
+python "$MULTICA_SKILLS_ROOT/multica-platform-opencontent/scripts/publish-artifacts.py" \
+  --type test-reports --workspace <WORKSPACE_SLUG> --issue <ISSUE-KEY> \
+  --file docs/test-reports/<ISSUE-KEY>/report.md --root-folder-id <ROOT_FOLDER_ID> --json
+```
 
-> 本 skill 把「平台对接」与「角色提示词」解耦：角色提示词只说"产出测试用例"，不关心平台。换公司（用 TestRail / Zephyr / 禅道 / 内部用例库）只改本 skill，不动 @测试专家 提示词。
-
-## 默认平台：本地 XMind 转 Jira
-
-- 产出：功能用例 / 接口用例 / 测试报告（依据 `multica-test-design` skill）。
-- 上传：本地用 XMind 编写用例心智图，经转换脚本 / 工具导入 Jira（测试用例 / 缺陷关联 Issue）。回传 Jira **用例集链接**与 Issue 关联号。
-- 取回：下游 @产品经理 / @业务评审 通过 Jira 链接读取，链接即稳定引用。
-
-## 产物内容规范（与角色解耦的部分）
-
-用例需覆盖：正常路径、边界、异常态、空态、无权限态；与 PRD 的 AC- 验收标准逐条对应。
-
-## 用法（角色侧只写这一句）
-
-> @测试专家：「产出用例 / 报告，用 `multica-artifact-test-sync` skill 落地到团队用例平台，并回传链接。」
-
-## 替换平台（不改角色提示词）
-
-把本 skill 的「默认平台」段替换为你们的工具（TestRail / Zephyr / 禅道 / 内部用例库），保持「上传 + 回传稳定链接」接口不变即可。
-
-## 为什么有效
-
-用例平台各团队不同，把平台名写进角色提示词会固化它；下沉到 skill 后，角色保持「产出什么内容」的稳定描述，平台随 skill 替换。
+多个文件由本 Skill 内部逐个调用，部分失败返回 `BLOCKED` 并保留成功项。更新固定使用 `fileModel=UPDATE` 和 `strategy=majorUpgrade`；不使用 Jira、XMind 导入或历史版本读取。Issue metadata/comment 由 Multica 保存。

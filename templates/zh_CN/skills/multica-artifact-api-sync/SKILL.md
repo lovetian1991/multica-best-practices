@@ -1,34 +1,19 @@
 ---
 name: multica-artifact-api-sync
-description: 把 API 接口文档产物对接到接口协作平台（默认 Apifox）。用于 @后台开发专家 上传 API 契约，供前端 / 测试下游消费。平台可替换。
+description: 将 API 契约 Markdown/JSON 上传或更新到 OpenContent，并回传稳定 internal_link 供前端和测试消费。
+metadata:
+  orchestrates:
+    - multica-platform-opencontent
 ---
 
 # 产物 · API 契约同步
 
-## 用途
+API 契约至少包含端点、请求/响应 schema、错误码、鉴权、状态机边界及 BR- 追溯。把契约写入本地文件后，使用 `multica-platform-opencontent` 的 `--type api` 发布。
 
-把 API 接口文档落地到团队统一的接口协作平台，并让下游（前端 / 测试）用稳定方式取回。
+```bash
+python "$MULTICA_SKILLS_ROOT/multica-platform-opencontent/scripts/publish-artifact.py" \
+  --type api --workspace <WORKSPACE_SLUG> --issue <ISSUE-KEY> \
+  --file docs/api/<ISSUE-KEY>/api-contract.md --root-folder-id <ROOT_FOLDER_ID> --json
+```
 
-> 本 skill 把「平台对接」与「角色提示词」解耦：角色提示词只说"产出 API 契约"，不关心平台。换公司（用 Swagger / Postman / YApi / 内部网关）只改本 skill，不动 @后台开发专家 提示词。
-
-## 默认平台：Apifox
-
-- 产出：API 契约（端点、入参 / 出参、错误码、鉴权、状态机边界）。
-- 上传：在 Apifox 维护接口定义，导出 / 同步后把**项目 / 接口分组链接**作为产物引用。
-- 取回：下游 @前端开发专家 / @测试专家 通过链接读取，链接即稳定引用。
-
-## 产物内容规范（与角色解耦的部分）
-
-依据阶段约定，API 契约至少包含：端点清单、请求 / 响应 schema、错误码表、鉴权方式、与 BR- 业务规则的对应关系。
-
-## 用法（角色侧只写这一句）
-
-> @后台开发专家：「产出 API 契约，用 `multica-artifact-api-sync` skill 落地到团队接口平台，并回传链接。」
-
-## 替换平台（不改角色提示词）
-
-把本 skill 的「默认平台」段替换为你们的工具（Swagger / YApi / Postman / 内部网关），保持「上传 + 回传稳定链接」接口不变即可。
-
-## 为什么有效
-
-接口平台各团队不同，把平台名写进角色提示词会固化它；下沉到 skill 后，角色保持「产出什么内容」的稳定描述，平台随 skill 替换。
+同名目标自动 `UPDATE + majorUpgrade`；下游使用返回的真实 `internal_link` 或 `oc-basic download url=...` 读取当前正文。Issue metadata 和评论由 Multica 调用方保存。

@@ -6,7 +6,6 @@ import argparse
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -36,16 +35,18 @@ def run_python(script: Path, args: list[str]) -> tuple[int, str]:
     return proc.returncode, output
 
 
-def append_jira(issue: str, wiki: str, jira_skill: Path) -> None:
-    jira_sh = jira_skill / "scripts" / "jira.sh"
-    if not jira_sh.is_file():
-        print("WARN: jira.sh not found, skip JIRA append", file=sys.stderr)
-        return
-    bash = shutil.which("bash")
-    if not bash:
-        print("WARN: bash not found, skip JIRA append (install Git Bash on Windows)", file=sys.stderr)
-        return
-    subprocess.run([bash, str(jira_sh), "append-description", issue, wiki], check=False)
+def publish_evidence(issue: str, workspace: str, root_folder: str, artifact_file: str) -> dict:
+    if not issue or not workspace or not artifact_file:
+        raise ValueError("--issue, --workspace and --artifact-file are required for evidence upload")
+    platform = resolve_skill_dir("multica-platform-opencontent", SKILL_DIR)
+    script = platform / "scripts" / "publish-artifact.py"
+    args = [str(script), "--type", "cicd", "--workspace", workspace, "--issue", issue, "--file", artifact_file, "--json"]
+    if root_folder:
+        args.extend(["--root-folder-id", root_folder])
+    proc = subprocess.run([sys.executable, *args], capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if proc.returncode != 0:
+        raise RuntimeError((proc.stderr or proc.stdout).strip())
+    return json.loads(proc.stdout)
 
 
 def resolve_services_from_issue(orch_cfg: dict, issue: str, env: str) -> list[str]:
@@ -74,6 +75,9 @@ def main() -> int:
     parser.add_argument("--version", action="append", default=[])
     parser.add_argument("--job-path", default="")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--artifact-file", default="", help="Optional CI evidence file to upload as a cicd artifact")
+    parser.add_argument("--workspace", default="", help="Workspace slug for --artifact-file")
+    parser.add_argument("--root-folder-id", default="", help="OpenContent root override for --artifact-file")
     args = parser.parse_args()
 
     config_path = SKILL_DIR / "config.yaml"
@@ -141,20 +145,6 @@ def main() -> int:
 
     deploy_base = ((jenkins_cfg.get("environments") or {}).get(env) or {}).get("deploy_base_url", "")
 
-    append = (orch_cfg.get("defaults") or {}).get("append_jira", True)
-    if append and args.issue and build_urls:
-        try:
-            jira_skill = resolve_skill_dir("multica-platform-jira", SKILL_DIR)
-            heading = (orch_cfg.get("jira") or {}).get("cicd_heading", "h3. CI/CD 部署 (Build / Deploy)")
-            wiki = heading + "\n"
-            for u in build_urls:
-                wiki += f"* [Build|{u}]\n"
-            if deploy_base:
-                wiki += f"* Deploy base: {deploy_base}\n"
-            append_jira(args.issue, wiki, jira_skill)
-        except FileNotFoundError as e:
-            print(f"WARN: {e}", file=sys.stderr)
-
     payload = {
         "issue": args.issue,
         "env": env,
@@ -163,6 +153,15 @@ def main() -> int:
         "build_urls": build_urls,
         "deploy_base_url": deploy_base,
     }
+    if args.artifact_file:
+        if rc != 0:
+            print("WARN: skip evidence upload because CI trigger failed", file=sys.stderr)
+        else:
+            try:
+                payload["artifact"] = publish_evidence(args.issue, args.workspace, args.root_folder_id, args.artifact_file)
+            except (OSError, ValueError, RuntimeError, json.JSONDecodeError) as exc:
+                print(f"ERROR: CI passed but evidence upload is BLOCKED: {exc}", file=sys.stderr)
+                rc = 2
     if args.json:
         print(json.dumps(payload, ensure_ascii=False, indent=2))
     else:

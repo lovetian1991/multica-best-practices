@@ -1,6 +1,6 @@
 # CI/CD 与测试流水线（方法论）
 
-> 本文件描述小队流水线里 **G2.5（CI/CD 部署）** 与 **测试专家三阶段（T1 / T2 / T3）** 的方法论框架。所有具体平台地址、Job 名、凭据都不在此出现——它们收敛在 `multica-platform-*` 与 `multica-artifact-*-sync` 的占位壳里，团队按自己的内网填。
+> 本文件描述小队流水线里 **G2.5（CI/CD 部署）** 与 **测试专家三阶段（T1 / T2 / T3）** 的方法论框架。CI 触发平台地址、Job 名、凭据仍由 CI 适配器管理；构建证据文件由 `multica-platform-opencontent` 保存，Issue 信息由 Multica 保存。
 
 ## 一、阶段总览
 

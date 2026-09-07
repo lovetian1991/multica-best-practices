@@ -111,8 +111,7 @@
 | `multica-artifact-cicd-sync` | [`../../skills/multica-artifact-cicd-sync/SKILL.md`](../../skills/multica-artifact-cicd-sync/SKILL.md) | 部署运维专家 |
 | `multica-test-automation` | [`../../skills/multica-test-automation/SKILL.md`](../../skills/multica-test-automation/SKILL.md) | 测试专家（T3） |
 | `multica-platform-jenkins` | [`../../skills/multica-platform-jenkins/SKILL.md`](../../skills/multica-platform-jenkins/SKILL.md) | 平台层占位壳（CI/CD） |
-| `multica-platform-jira` | [`../../skills/multica-platform-jira/SKILL.md`](../../skills/multica-platform-jira/SKILL.md) | 平台层占位壳（Issue） |
-| `multica-platform-confluence` | [`../../skills/multica-platform-confluence/SKILL.md`](../../skills/multica-platform-confluence/SKILL.md) | 平台层占位壳（Wiki） |
+| `multica-platform-opencontent` | [`../../skills/multica-platform-opencontent/SKILL.md`](../../skills/multica-platform-opencontent/SKILL.md) | 平台层适配（产物文件） |
 
 > 16 个 Skill 全部共享放在 [`../../skills/`](../../skills/)，统一 `multica-` 前缀命名空间，分三类：判门/设计类、产物编排类（`multica-artifact-*-sync`）、平台层占位壳（唯一允许出现内网地址/凭据的地方，公开仓库只给占位壳）。Skill 靠**名称**挂载，谁需要就在自己的 提示词 里写「用 xxx skill」，与仓库路径无关。
 

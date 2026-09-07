@@ -9,7 +9,7 @@ description: 把 Issue / 诉求结构化为带编号的 PRD 内容。用于 @产
 
 把 Issue、会议结论、零散想法变成**清晰、可评审、可拆任务**的 PRD 内容，并写入产品设计小队唯一正式交付物 `prd-<功能名称>.md`（只管「写什么」，不管「落到哪个平台」）。
 
-> 本 skill 与 `multica-artifact-req-sync` 分工：**analysis 产出结构与编号；req-sync 负责 Confluence / JIRA / 钉钉等平台对接**。换平台只改 req-sync，不动本 skill。
+> 本 skill 与 `multica-artifact-req-sync` 分工：**analysis 产出结构与编号；req-sync 负责通过 OpenContent 落地文件**。Issue 数据由 Multica 自身保存。
 
 ## 流程
 
@@ -24,7 +24,7 @@ description: 把 Issue / 诉求结构化为带编号的 PRD 内容。用于 @产
 
 ## 需求结构
 
-把输入结构化为 `prd-<功能名称>.md` 章节（章节基线见 `multica-platform-confluence` 的 `scripts/templates/prd-template.md`），并叠加 Multica 编号。`<功能名称>` 必须取自本次实现的功能，使用简短、稳定、可读的中文名称，例如 `用户邀请`、`订单退款`；禁止使用笼统的 `prd.md`，同一功能后续变更更新原文件。
+把输入结构化为 `prd-<功能名称>.md` 章节，并叠加 Multica 编号。`<功能名称>` 必须取自本次实现的功能，使用简短、稳定、可读的中文名称，例如 `用户邀请`、`订单退款`；禁止使用笼统的 `prd.md`，同一功能后续变更更新原文件。
 
 | 章节 | 编号 |
 | --- | --- |
@@ -84,10 +84,10 @@ description: 把 Issue / 诉求结构化为带编号的 PRD 内容。用于 @产
 
 ## 交接
 
-结构就绪后，用 `multica-artifact-req-sync` skill 更新同一份功能 PRD 文件在团队需求平台的引用（Confluence 页面 + JIRA Story + 可选钉钉），不得为 UI / 技术章节创建多个独立最终文档，并回传稳定链接给对应小队负责人。
+结构就绪后，用 `multica-artifact-req-sync` skill 将同一份功能 PRD 文件上传/更新到 OpenContent，写入 Multica Issue metadata/comment，并回传稳定 internal_link。
 
 > @产品经理：「先用 `multica-requirement-analysis` 结构化 PRD，再用 `multica-artifact-req-sync` 落地并回传链接。」
 
 ## 为什么有效
 
-需求阶段的歧义会在后续每个阶段被放大。用 BLOCKED 挡住歧义、用编号让下游可拆任务，比让 5 个 智能体 各自猜一遍便宜得多；内容与平台解耦后，换 Confluence / 语雀 / 飞书也不动分析逻辑。
+需求阶段的歧义会在后续每个阶段被放大。用 BLOCKED 挡住歧义、用编号让下游可拆任务；内容与平台解耦后，只替换 artifact-sync 平台实现，不动分析逻辑。

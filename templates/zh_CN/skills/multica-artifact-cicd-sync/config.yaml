@@ -3,7 +3,7 @@ version: "1.1"
 
 defaults:
   environment: sit       # dev | sit
-  append_jira: true
+  upload_evidence: false
 
 # Issue 前缀 → 默认触发哪些 service（见 multica-platform-jenkins/jobs-catalog.yaml）
 # 注意：以下为示例映射，请按你团队的「Issue 前缀 → Jenkins 服务」替换为真实配置。
@@ -21,5 +21,5 @@ issue_service_map:
     dev: [<service-d>]
     sit: [<service-d>]
 
-jira:
-  cicd_heading: "h3. CI/CD 部署 (Build / Deploy)"
+opencontent:
+  artifact_type: cicd

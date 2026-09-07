@@ -1,0 +1,18 @@
+version: "1.0"
+
+opencontent:
+  artifact_root_folder_id: "<OPENCONTENT_DEFAULT_ROOT_FOLDER_ID>"
+  allowed_root_folder_ids:
+    - "<OPENCONTENT_DEFAULT_ROOT_FOLDER_ID>"
+  workspace_folder_pattern: "{workspace}"
+  issue_folder_pattern: "{issue}"
+  folders:
+    requirement: "requirements"
+    design: "design"
+    api: "api"
+    test-cases: "test-cases"
+    test-reports: "test-reports"
+    cicd: "cicd"
+  upload:
+    default_file_model: "UPLOAD"
+    update_strategy: "majorUpgrade"

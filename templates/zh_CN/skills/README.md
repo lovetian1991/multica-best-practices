@@ -6,17 +6,16 @@
 
 | Skill | 用途 | 主要入口 |
 |---|---|---|
-| `multica-platform-confluence` | 把设计文档 / PRD 发布到 Confluence | `scripts/publish_design.py`、`scripts/confluence.sh` |
-| `multica-platform-jira` | 读写 JIRA issue、评论、状态流转 | `scripts/jira.sh` |
+| `multica-platform-opencontent` | 通过 oc-basic 管理产物目录、上传、更新、内链和下载 | `scripts/publish-artifact.py`、`scripts/fetch-artifact.py` |
 | `multica-platform-jenkins` | 触发 Jenkins 构建 / 发布 / 晋级 | `scripts/trigger_env.py`、`scripts/build_sit.py`、`scripts/promote_prod.py` |
 
-> 平台层只放"公司专属 URL / 凭据"的占位外壳，不含任何真实地址。使用方在 `.env` 填自己的 `JENKINS_URL` / `JIRA_URL` / `CONFLUENCE_URL` 等即可。
+> 平台层只放 URL / 凭据的占位外壳，不含任何真实地址。Issue 数据由 Multica 保存；OpenContent 凭据仅由 `oc-basic` 运行环境读取。
 
 ## 二、编排层（调用平台层把产物落地到团队平台）
 
 | Skill | 用途 | 主要入口 |
 |---|---|---|
-| `multica-artifact-req-sync` | PRD / 需求 → Confluence + JIRA issue | `scripts/publish-prd.sh` |
+| `multica-artifact-req-sync` | PRD / 需求 → OpenContent 文件 + Multica Issue 引用 | `scripts/publish-prd.sh` |
 | `multica-artifact-cicd-sync` | 代码评审结论 → 触发 Jenkins CICD | `scripts/trigger_cicd.py` |
 | `multica-artifact-api-sync` | API 文档 → 团队 API 平台 | （纯编排） |
 | `multica-artifact-design-sync` | 设计文档 → 团队设计平台 | （纯编排） |
@@ -43,7 +42,7 @@
 ## 四、怎么挂载到 Multica
 
 1. 把需要的 Skill 目录整体拷到你的 Multica workspace 的 `skills/` 下（目录名即 Skill 名，需与 `SKILL.md` 里的 `name` 字段一致）。
-2. 含脚本的 Skill：先 `cp .env.example .env` 并填入你自己的 `JENKINS_URL` / `JIRA_URL` / `CONFLUENCE_URL` / `ATLASSIAN_USER` / `ATLASSIAN_PASS` 等，再按该 Skill 的 `README.md` 安装依赖、运行示例。
+2. 含脚本的 Skill：先按对应 README 配置运行时环境；OpenContent 只需设置 `OC_CLI_PATH`、`MULTICA_SERVER_URL` 和 `OPENCONTENT_APIKEY`，不要提交 `.env`。
 3. 平台层的 URL / 凭据**永远不要提交真实值**——保留 `.env.example` 占位即可。
 
 ## 五、命名约定

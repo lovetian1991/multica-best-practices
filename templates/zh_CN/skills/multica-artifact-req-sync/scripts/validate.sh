@@ -14,7 +14,7 @@ for required in SKILL.md config.yaml .env.example scripts/credentials.sh scripts
   [ -f "$required" ] || fail "missing required file: $required"
 done
 
-for platform in multica-platform-confluence multica-platform-jira; do
+for platform in multica-platform-opencontent; do
   [ -f "$SKILLS_ROOT/$platform/SKILL.md" ] || fail "missing platform skill: $platform"
 done
 
@@ -31,7 +31,7 @@ meta = yaml.safe_load(text.split("---", 2)[1])
 if meta.get("name") != "multica-artifact-req-sync":
     sys.exit("unexpected skill name")
 orch = (meta.get("metadata") or {}).get("orchestrates") or []
-expected = {"multica-platform-confluence", "multica-platform-jira"}
+expected = {"multica-platform-opencontent"}
 if not expected.issubset(set(orch)):
     sys.exit(f"metadata.orchestrates must include {expected}")
 print("SKILL.md ok")

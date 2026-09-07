@@ -207,7 +207,7 @@ flowchart TB
     class FIX1,FIX2,PUSH,DISCOVER,CICD,FIX25,FAIL3,BLOCK3,REJECT action;
 ```
 
-> 关键约束：① 所有门禁由 Leader 用 `multica-verification` 独立复跑，不采信成员自述；② T3 **必须**等 G2.5 PASS 后才派发；③ 外部工具（Confluence / JIRA / Jenkins / Figma / 用例平台）经 `multica-artifact-*-sync` 与 `multica-platform-*` 壳层可替换接入，公开仓库只保留占位壳；④ 任一产物被修改后，其下游门禁立即失效、必须重新门禁。
+> 关键约束：① 所有门禁由 Leader 用 `multica-verification` 独立复跑，不采信成员自述；② T3 **必须**等 G2.5 PASS 后才派发；③ 产物文件经 `multica-artifact-*-sync` 接入 `multica-platform-opencontent`，CI 触发仍由独立 CI 平台负责，公开仓库只保留占位配置；④ 任一产物被修改后，其下游门禁立即失效、必须重新门禁。
 
 ## 5 分钟快速开始
 
@@ -270,10 +270,9 @@ flowchart TB
 | `multica-artifact-cicd-sync` | [`templates/zh_CN/skills/multica-artifact-cicd-sync/SKILL.md`](./templates/zh_CN/skills/multica-artifact-cicd-sync/SKILL.md) | DevOps（触发 CI/CD 部署） |
 | `multica-test-automation` | [`templates/zh_CN/skills/multica-test-automation/SKILL.md`](./templates/zh_CN/skills/multica-test-automation/SKILL.md) | Tester（T3 自动化执行） |
 | `multica-platform-jenkins` | [`templates/zh_CN/skills/multica-platform-jenkins/SKILL.md`](./templates/zh_CN/skills/multica-platform-jenkins/SKILL.md) | 平台层占位壳（CI/CD 系统） |
-| `multica-platform-jira` | [`templates/zh_CN/skills/multica-platform-jira/SKILL.md`](./templates/zh_CN/skills/multica-platform-jira/SKILL.md) | 平台层占位壳（Issue 系统） |
-| `multica-platform-confluence` | [`templates/zh_CN/skills/multica-platform-confluence/SKILL.md`](./templates/zh_CN/skills/multica-platform-confluence/SKILL.md) | 平台层占位壳（知识库/Wiki） |
+| `multica-platform-opencontent` | [`templates/zh_CN/skills/multica-platform-opencontent/SKILL.md`](./templates/zh_CN/skills/multica-platform-opencontent/SKILL.md) | 产物文件平台适配（oc-basic） |
 
-> 16 个 Skill 全部共享放在 `templates/zh_CN/skills/`，统一 `multica-` 前缀命名空间。三类：**门禁/设计类**（multica-verification / multica-gate-setup / multica-test-design / multica-requirement-analysis / multica-technical-design / multica-implementation）；**产物编排类**（`multica-artifact-*-sync` 五个 + cicd-sync，负责把产物落地到团队平台，平台在 skill 内实现、可替换）；**平台层占位壳**（multica-platform-* 三个 + multica-test-automation，唯一允许出现公司内网地址/凭据的地方，公开仓库只给占位壳）。角色提示词只说"用哪个 skill"，不写平台名；换公司只填平台壳。详见 artifact-conventions 的三层架构。Skill 靠**名称**挂载，谁需要就在自己的 Instructions 里写「用 xxx skill」，与仓库路径无关。
+> Skills 全部共享放在 `templates/zh_CN/skills/`，统一 `multica-` 前缀命名空间。产物文件由 `multica-platform-opencontent` 适配，CI 触发由独立 CI 平台适配，Issue 数据由 Multica 保存。角色提示词只说"用哪个 skill"，不写平台名；详见 artifact-conventions 的三层架构。Skill 靠**名称**挂载，谁需要就在自己的 Instructions 里写「用 xxx skill」，与仓库路径无关。
 
 ### Step 3 — 创建 Squad
 
@@ -281,7 +280,7 @@ flowchart TB
 
 ### Step 4 — 创建 Issue
 
-把 `templates/zh_CN/squad/software-development/issue.md` 复制到新 Issue：若需求已在 Jira/Tapd，选「外部系统链接」只填链接 + 涉及端即可；否则选「全量自包含」完整填写。
+把 `templates/zh_CN/squad/software-development/issue.md` 复制到新 Issue：若需求已在外部系统，选「外部系统链接」只填链接 + 涉及端即可；否则选「全量自包含」完整填写。
 
 ### Step 5 — 分配
 

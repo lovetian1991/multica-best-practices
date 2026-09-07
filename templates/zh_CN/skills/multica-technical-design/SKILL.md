@@ -9,7 +9,7 @@ description: 基于 PRD 与现有代码产出最小技术方案。用于 @技术
 
 基于 PRD（或 Issue）与现有代码库，产出**最小可行**的技术设计（只管「写什么」，不管「落到哪个平台」）。
 
-> 与 `multica-artifact-design-sync` 分工：**technical-design 产出结构与内容；design-sync 调用 Confluence/JIRA platform skills 落地**。
+> 与 `multica-artifact-design-sync` 分工：**technical-design 产出结构与内容；design-sync 调用 OpenContent 平台 Skill 落地**。
 
 ## 流程
 
@@ -37,7 +37,7 @@ description: 基于 PRD 与现有代码产出最小技术方案。用于 @技术
 docs/design/<ISSUE-KEY>/design.md
 ```
 
-章节基线见 `multica-platform-confluence` 的 `scripts/templates/design-template.md`。
+章节基线由本 Skill 的“输出（必须包含）”定义；落地由 `multica-artifact-design-sync` 负责。
 
 ## 输出（必须包含）
 
@@ -56,12 +56,10 @@ docs/design/<ISSUE-KEY>/design.md
 
 ```text
 先用 multica-technical-design 写 docs/design/<ISSUE-KEY>/design.md，
-再用 multica-artifact-design-sync 发布到 Confluence（父页面 <CONFLUENCE_DESIGN_PAGE_ID>）并回写 JIRA 链接。
+再用 multica-artifact-design-sync 上传到 OpenContent 并回传 internal_link。
 ```
-
-Confluence 设计目录：[pageId=<CONFLUENCE_DESIGN_PAGE_ID>](http://<CONFLUENCE_URL>/pages/viewpage.action?pageId=<CONFLUENCE_DESIGN_PAGE_ID>)
 
 ## 为什么有效
 
-设计先本地 Markdown、再 upsert Confluence，与 dev-workflow 一致：可 diff、可评审、链接稳定回写 JIRA，下游 @前端开发专家 / @后台开发专家 / @测试专家 靠链接消费。
+设计先本地 Markdown、再上传/更新 OpenContent，与 dev-workflow 一致：可 diff、可评审、链接稳定写入 Multica Issue metadata，下游 @前端开发专家 / @后台开发专家 / @测试专家 靠 internal_link 消费。
 
