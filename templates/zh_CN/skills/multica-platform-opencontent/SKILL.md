@@ -20,16 +20,16 @@ metadata:
 ## 配置
 
 复制 `.env.example` 到运行环境（不要提交 `.env`）。`OC_CLI_PATH` 指向 `oc-basic` 可执行命令或 `oc.js`；也可使用 `OPENCONTENT_CLI_PATH`。
+运行时注入 `MULTICA_SERVER_URL`、`OPENCONTENT_APIKEY` 和当前 Issue 的 `MULTICA_KB_FOLDER_ID`。其中 `MULTICA_KB_FOLDER_ID` 自动作为 `artifact-root-folder`，优先级高于配置文件默认值；只有需要人工覆盖时才传 `--root-folder-id`。
 
-`config.yaml` 的根目录只是默认值。运行时根目录优先级为：上游参数、Issue metadata、Issue property、配置默认值。所有值都必须出现在 `allowed_root_folder_ids`，并先通过 `folder-info`。
+`config.yaml` 的根目录只是默认值。运行时根目录优先级为：`--root-folder-id`、`MULTICA_KB_FOLDER_ID`、Issue metadata/property、配置默认值。所有值都必须出现在 `allowed_root_folder_ids`，并先通过 `folder-info`。
 
 ## 发布流程
 
 ```bash
 python scripts/publish-artifact.py \
   --type requirement --workspace <workspace-slug> --issue <ISSUE-KEY> \
-  --file docs/requirements/<ISSUE-KEY>/prd-login.md \
-  --root-folder-id <ROOT_FOLDER_ID> --json
+  --file docs/requirements/<ISSUE-KEY>/prd-login.md --json
 ```
 
 脚本按 `<root>/<workspace>/<issue>/<artifact-type>` 建立目录。固定文件名首次使用 `fileModel=UPLOAD`；若 Issue metadata 已有文件引用，或目标目录中同名文件只有一个，自动使用 `fileModel=UPDATE strategy=majorUpgrade`。同名候选超过一个时返回 `BLOCKED`，不自动选择。

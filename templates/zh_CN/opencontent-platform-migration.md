@@ -71,9 +71,9 @@ OpenContent 的命令使用 `folderId`，不是本地路径。建议在企业库
 
 ```yaml
 opencontent:
-  artifact_root_folder_id: "<OPENCONTENT_DEFAULT_ROOT_FOLDER_ID>"
+  artifact_root_folder_id: "${MULTICA_KB_FOLDER_ID}"
   allowed_root_folder_ids:
-    - "<OPENCONTENT_DEFAULT_ROOT_FOLDER_ID>"
+    - "${MULTICA_KB_FOLDER_ID}"
   folders:
     requirements: "requirements"
     design: "design"
@@ -88,13 +88,14 @@ opencontent:
 
 ### 根目录来源与优先级
 
-根目录可以由上游传递，也可以在创建 Issue 时写入 Multica，但不能接受未经校验的任意 `folderId`。推荐按以下优先级解析：
+根目录可以由上游传递，也可以由运行环境注入或在创建 Issue 时写入 Multica，但不能接受未经校验的任意 `folderId`。在 Multica 运行时，`MULTICA_KB_FOLDER_ID` 就是当前 Issue 的 `artifact-root-folder`。推荐按以下优先级解析：
 
-1. 本次 artifact-sync 上游显式传入的 `artifact_root_folder_id`。
-2. Issue `metadata` 中的 `artifact_root_folder_id`。
-3. Issue 自定义属性 `artifact_root_folder_id`（只有需要 UI 展示、筛选或人工维护时使用）。
-4. 当前工作区/项目的 `config.yaml` 默认根目录。
-5. 没有任何有效值时阻断任务，不要静默使用企业库根目录。
+1. 本次 artifact-sync 上游显式传入的 `artifact_root_folder_id`（脚本对应 `--root-folder-id`）。
+2. 运行环境注入的 `MULTICA_KB_FOLDER_ID`。
+3. Issue `metadata` 中的 `artifact_root_folder_id`。
+4. Issue 自定义属性 `artifact_root_folder_id`（只有需要 UI 展示、筛选或人工维护时使用）。
+5. 当前工作区/项目的 `config.yaml` 默认根目录。
+6. 没有任何有效值时阻断任务，不要静默使用企业库根目录。
 
 无论根目录来自上游参数、Issue metadata/property 还是配置默认值，都必须经过允许列表校验（`allowed_root_folder_ids`），并用 `folder-info` 确认它确实是当前用户可访问的文件夹。校验失败时返回 `BLOCKED`，不创建或上传文件。
 
@@ -319,7 +320,7 @@ fetch-artifact --internal-link <opencontent-internal-link> --output <local-dir>
 
 ## 推荐实施顺序
 
-1. 在 OpenContent 企业库创建根目录，确认 `OPENCONTENT_SITE`、`OPENCONTENT_APIKEY` 和 `MULTICA_SERVER_URL` 通过运行环境注入；不要提交 `.env`。
+1. 在 OpenContent 企业库创建根目录，确认 `MULTICA_KB_FOLDER_ID`、`OPENCONTENT_APIKEY` 和 `MULTICA_SERVER_URL` 通过运行环境注入；不要提交 `.env`。
 2. 先按 `oc-basic` 文档逐个验证 `user-info`、`file-list`、`create-folder`、`upload`、`file-info`、`file-internal-link`、`download`。
 3. 实现 `multica-platform-opencontent`，用一个测试 Issue 跑通“解析根目录 → 首次上传 → 生成内部链接 → 更新同一文件 → 下载当前版本”。多个产物由适配层循环调用单文件上传/更新。
 4. 迁移 `req-sync` 和 `design-sync`，确认首次发布、同一文件更新、内部链接回传和下游下载都能跑通。
@@ -336,7 +337,7 @@ fetch-artifact --internal-link <opencontent-internal-link> --output <local-dir>
 - [ ] 下游使用上游回传的真实 `internal_link`，并可将其直接传给 `download url=...` 获取正文。
 - [ ] `internal_link` 未被改写为伪造 URL，也未被误当成公开分享链接。
 - [ ] 当前产物 `internal_link` 和 `file_id` 已写入 Multica Issue metadata，发布结果已追加 Issue 评论。
-- [ ] 根目录来源遵循“上游参数 → Issue metadata/property → 配置默认值”的优先级，并通过允许列表和 `folder-info` 校验。
+- [ ] 根目录来源遵循“上游参数 → `MULTICA_KB_FOLDER_ID` → Issue metadata/property → 配置默认值”的优先级，并通过允许列表和 `folder-info` 校验。
 - [ ] 同名文件只有一个明确目标时自动更新；出现多个候选时直接 `BLOCKED`，不自动取第一项，也不要求在流程中人工确认后继续。
 - [ ] 每个普通 `oc-basic` 子命令首次调用前执行过 `--help`，并按实际 JSON 解析。
 - [ ] Issue 状态、字段、排期和评论均由 Multica 自身保存和读取，不依赖 Jira。

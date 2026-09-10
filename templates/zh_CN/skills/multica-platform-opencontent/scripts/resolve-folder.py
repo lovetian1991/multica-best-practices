@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 import sys
 
@@ -14,6 +15,14 @@ from oc_common import command_help, emit, first_value, items, run_oc
 def load_config() -> dict:
     path = Path(__file__).resolve().parent.parent / "config.yaml"
     return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+
+
+def resolve_env(value: object) -> str:
+    """Resolve ${NAME} placeholders used for runtime-injected configuration."""
+    text = str(value or "").strip()
+    if text.startswith("${") and text.endswith("}"):
+        return os.environ.get(text[2:-1], "").strip()
+    return text
 
 
 def folder_name(data: dict, expected: str) -> str | None:
@@ -46,10 +55,17 @@ def main() -> int:
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
     cfg = load_config().get("opencontent", {})
-    root_folder_id = str(args.root_folder_id or cfg.get("artifact_root_folder_id") or "")
+    # The issue-scoped runtime value is the normal Multica integration path.
+    # Explicit CLI input remains useful for local/manual runs and takes priority.
+    root_folder_id = (
+        str(args.root_folder_id or "").strip()
+        or os.environ.get("MULTICA_KB_FOLDER_ID", "").strip()
+        or resolve_env(cfg.get("artifact_root_folder_id"))
+    )
     if not root_folder_id:
-        raise RuntimeError("root folder is missing; pass --root-folder-id or configure artifact_root_folder_id")
-    allowed = {str(value) for value in cfg.get("allowed_root_folder_ids", [])}
+        raise RuntimeError("root folder is missing; set MULTICA_KB_FOLDER_ID, pass --root-folder-id, or configure artifact_root_folder_id")
+    allowed = {resolve_env(value) for value in cfg.get("allowed_root_folder_ids", [])}
+    allowed.discard("")
     if root_folder_id not in allowed:
         raise RuntimeError("root folder is not in opencontent.allowed_root_folder_ids")
     command_help("folder-info")

@@ -27,8 +27,7 @@ metadata:
 ```bash
 python "$MULTICA_SKILLS_ROOT/multica-platform-opencontent/scripts/publish-artifact.py" \
   --type requirement --workspace <WORKSPACE_SLUG> --issue <ISSUE-KEY> \
-  --file docs/requirements/<ISSUE-KEY>/prd-<功能名称>.md \
-  --root-folder-id <ROOT_FOLDER_ID> --json
+  --file docs/requirements/<ISSUE-KEY>/prd-<功能名称>.md --json
 ```
 
 如果 Issue metadata 中已有 `artifact_requirement_file_id` 或 `artifact_requirement_internal_link`，通过 `--reference` 传入；没有时平台层会在唯一同名文件上自动更新，多候选则 `BLOCKED`。

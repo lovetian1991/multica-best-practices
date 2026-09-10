@@ -5,7 +5,7 @@ PRD 文件编排 Skill：调用 `multica-platform-opencontent` 上传或更新�
 ## 快速开始
 
 1. 挂载本目录和 `multica-platform-opencontent`，设置 `MULTICA_SKILLS_ROOT`。
-2. 配置平台 Skill 的 `OC_CLI_PATH`、`MULTICA_SERVER_URL` 和 `OPENCONTENT_APIKEY`。
+2. 配置平台 Skill 的 `OC_CLI_PATH`、`MULTICA_SERVER_URL`、`OPENCONTENT_APIKEY` 和当前 Issue 的 `MULTICA_KB_FOLDER_ID`。平台 Skill 会自动使用该值作为 artifact 根目录。
 3. 在 `multica-platform-opencontent/config.yaml` 设置根目录和允许列表。
 
 ```bash

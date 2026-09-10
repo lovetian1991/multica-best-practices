@@ -1,9 +1,10 @@
 version: "1.0"
 
 opencontent:
-  artifact_root_folder_id: "<OPENCONTENT_DEFAULT_ROOT_FOLDER_ID>"
+  # The orchestrator injects the current issue root at runtime.
+  artifact_root_folder_id: "${MULTICA_KB_FOLDER_ID}"
   allowed_root_folder_ids:
-    - "<OPENCONTENT_DEFAULT_ROOT_FOLDER_ID>"
+    - "${MULTICA_KB_FOLDER_ID}"
   workspace_folder_pattern: "{workspace}"
   issue_folder_pattern: "{issue}"
   folders:

@@ -29,7 +29,15 @@ def run_oc(command: str, params: dict[str, Any] | None = None, *, help_only: boo
             if value is True:
                 value = "true"
             args.append(f"{key}={value}")
-    proc = subprocess.run(args, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    # Keep platform-injected credentials available to oc-basic/oc.js.
+    proc = subprocess.run(
+        args,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        env=os.environ.copy(),
+    )
     output = (proc.stdout or "").strip()
     if proc.returncode != 0:
         detail = (proc.stderr or output or f"oc-basic {command} failed").strip()
