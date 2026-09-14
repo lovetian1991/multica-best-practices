@@ -1,6 +1,6 @@
 ---
 name: oc-basic
-description: OpenContent智能文档云（简称：OC,ECM,文档云）基础文件能力集成 Skill。支持文件管理（列表、上传、下载）、文件和文件夹信息查询、新建文件夹以及当前用户信息。当用户需要浏览目录、操作基础文件或文件夹、上传下载文件时，使用此 Skill。
+description: OpenContent智能文档云（简称：OC,ECM,文档云）基础文件能力集成 Skill。支持文件管理（列表、上传、下载、内链）、文件和文件夹信息查询、新建文件夹以及当前用户信息。当用户需要浏览目录、操作基础文件或文件夹、上传下载文件、获取内部访问地址时，使用此 Skill。
 ---
 
 # oc-basic
@@ -44,6 +44,7 @@ $CLI <command> key=value ...
 | 企业库列表、查看企业库、企业库根目录 | `file-list folderId=1` | `search.md` |
 | 个人库列表、查看个人库、个人库根目录 | `file-list folderId=2` | `search.md` |
 | 获取文件信息、通过文件预览地址查询 | `file-info fileId={id/guid/url}` | `search.md` |
+| 内链、内部链接、内部访问地址 | `file-internal-link fileId={id/guid/url}` | `search.md` |
 | 获取文件夹信息、通过文件夹浏览器地址查询 | `folder-info folderId={id/guid/url}` | `search.md` |
 | 上传文件 | `upload` | `transfer.md` |
 | 下载文件、通过预览地址下载 | `download` / `download url=...` | `transfer.md` |
@@ -72,7 +73,7 @@ $CLI <command> key=value ...
 
 **触发关键词（命中任一即激活本 Skill）：**
 
-> 个人库、企业库、网盘、文档云、找文件、找文件夹、上传、下载、文件夹、文件列表、浏览目录、文件信息、文件夹信息、新建文件夹、当前用户
+> 个人库、企业库、网盘、文档云、找文件、找文件夹、上传、下载、内链、内部链接、内部访问地址、文件夹、文件列表、浏览目录、文件信息、文件夹信息、新建文件夹、当前用户
 
 ## 故障排除
 
@@ -87,4 +88,4 @@ $CLI <command> key=value ...
 1. 文件和文件夹 ID 支持数字 ID、GUID 或对应的预览/浏览器地址。
 2. `file-list` 默认企业库根目录的 `folderId=1`，个人库根目录使用 `folderId=2`。
 3. 上传支持单文件和批量文件；扩展名自动补点，例如 `pdf` 自动转为 `.pdf`。
-4. 本 Skill 只提供上述 7 个命令；其它高级文件管理能力不属于本 Skill 范围。
+4. 本 Skill 只提供上述 8 个命令；其它高级文件管理能力不属于本 Skill 范围。

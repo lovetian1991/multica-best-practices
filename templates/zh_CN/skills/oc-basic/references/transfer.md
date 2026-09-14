@@ -8,14 +8,15 @@
 | --- | --- | --- | --- |
 | `filePaths` | string | 是 | 本地文件路径；多个文件用竖线分隔 |
 | `folderId` | string | 是 | 目标文件夹 ID、GUID 或浏览器地址 |
+| `fileId` | string | — | 更新已有文件时填写，支持 ID、GUID 或文件地址；传入时仅支持单文件 |
+| `fileModel` | string | — | `UPLOAD`（默认）/ `UPDATE` |
+| `strategy` | string | — | 更新策略，仅 `fileModel=UPDATE` 时生效：`majorUpgrade` 升级主版本（默认）、`minorUpgrade` 升级次版本、`overlayLatestVersion` 覆盖最新版本 |
 | `fileRemark` | string | 否 | 文件备注 |
 
 ```bash
 $CLI upload filePaths=/path/to/file.pdf folderId=8616
 $CLI upload 'filePaths=/path/a.txt|/path/b.md' folderId=8616
 ```
-
-服务端默认限制上传为 20 MiB，并允许 `.md`、`.txt`、`.pdf`、`.png`、`.jpg`、`.jpeg`、`.gif`、`.webp`。后缀、空文件和实际内容类型由 Multica 服务端校验。
 
 ## download
 

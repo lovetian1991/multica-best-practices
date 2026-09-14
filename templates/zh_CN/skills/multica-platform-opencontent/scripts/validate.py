@@ -9,7 +9,7 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parent.parent
-required = ["SKILL.md", "config.yaml", ".env.example", "scripts/oc_common.py", "scripts/resolve-folder.py", "scripts/publish-artifact.py", "scripts/publish-artifacts.py", "scripts/fetch-artifact.py"]
+required = ["SKILL.md", "config.yaml", ".env.example", "cli/bin/oc.js", "scripts/oc_common.py", "scripts/resolve-folder.py", "scripts/publish-artifact.py", "scripts/publish-artifacts.py", "scripts/fetch-artifact.py"]
 missing = [item for item in required if not (ROOT / item).is_file()]
 if missing:
     raise SystemExit(f"missing required files: {', '.join(missing)}")

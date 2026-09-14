@@ -38,6 +38,22 @@ $CLI file-info fileId="https://example.test/ecm?ctl=1#/preview?fileid=5a2a7aeb-b
 
 如果返回多个候选，不要自动选择。文件 ID/GUID 的解析由受控服务完成。
 
+## file-internal-link
+
+按文件 ID、GUID 或预览地址生成文件的系统内访问地址。
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `fileId` | string | 是 | 文件 ID、GUID 或包含 `fileid` 参数的预览地址 |
+
+传入数字文件 ID 时，命令会先查询文件信息以取得 `fileGuid`；传入 GUID 或预览地址时直接生成内部链接。返回结果可能包含 `fileId`、`fileGuid`、`fileName` 和 `url`；直接传入 GUID 或地址时，至少返回 `fileGuid` 和 `url`。
+
+```bash
+$CLI file-internal-link fileId=150120
+$CLI file-internal-link fileId=5a2a7aeb-b9fa-4d52-a6e7-4f0899932e7b
+$CLI file-internal-link fileId="https://example.test/ecm?ctl=1#/preview?fileid=5a2a7aeb-b9fa-4d52-a6e7-4f0899932e7b"
+```
+
 ## folder-info
 
 按文件夹 ID、GUID 或浏览器地址查询文件夹信息。

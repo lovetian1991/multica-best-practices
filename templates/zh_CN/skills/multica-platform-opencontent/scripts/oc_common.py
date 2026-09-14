@@ -11,7 +11,8 @@ from typing import Any
 
 
 def cli_command() -> list[str]:
-    value = os.environ.get("OC_CLI_PATH") or os.environ.get("OPENCONTENT_CLI_PATH") or "oc"
+    bundled_cli = Path(__file__).resolve().parent.parent / "cli" / "bin" / "oc.js"
+    value = os.environ.get("OC_CLI_PATH") or os.environ.get("OPENCONTENT_CLI_PATH") or str(bundled_cli)
     parts = shlex.split(value, posix=os.name != "nt")
     if not parts:
         raise RuntimeError("OC_CLI_PATH is empty")
