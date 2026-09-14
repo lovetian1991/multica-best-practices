@@ -1,11 +1,27 @@
 ﻿param(
-    [string]$RuntimeId = 'd4b16b09-a23c-4fb1-a7af-a1ebdd16473a',
-    [string]$WorkspaceSlug = 'tanyo',
+    [string]$RuntimeId = $(if ($env:MULTICA_RUNTIME_ID) { $env:MULTICA_RUNTIME_ID } else { '' }),
+    [string]$ServerUrl = $(if ($env:MULTICA_SERVER_URL) { $env:MULTICA_SERVER_URL } else { '' }),
+    [string]$WorkspaceSlug = $(if ($env:MULTICA_WORKSPACE_SLUG) { $env:MULTICA_WORKSPACE_SLUG } else { '' }),
+    [string]$Model = $(if ($env:MULTICA_AGENT_MODEL) { $env:MULTICA_AGENT_MODEL } else { '' }),
+    [string]$RuntimeMapFile = $(if ($env:MULTICA_RUNTIME_MAP_FILE) { $env:MULTICA_RUNTIME_MAP_FILE } else { '' }),
     [switch]$SkipSquads,
     [switch]$AgentsOnly
 )
 
 $ErrorActionPreference = 'Stop'
+
+if ([string]::IsNullOrWhiteSpace($WorkspaceSlug)) {
+    throw 'WorkspaceSlug is required. Pass -WorkspaceSlug <slug> or set MULTICA_WORKSPACE_SLUG.'
+}
+if ([string]::IsNullOrWhiteSpace($ServerUrl)) {
+    throw 'ServerUrl is required. Pass -ServerUrl <api-url> or set MULTICA_SERVER_URL.'
+}
+if ([string]::IsNullOrWhiteSpace($env:MULTICA_TOKEN)) {
+    throw 'MULTICA_TOKEN is required. Set it for the current process; never store it in this repository.'
+}
+
+$ServerUrl = $ServerUrl.TrimEnd('/')
+$env:MULTICA_SERVER_URL = $ServerUrl
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
 . (Join-Path $PSScriptRoot 'agent-names.ps1')
@@ -42,20 +58,14 @@ function Invoke-MulticaRestPut {
         [hashtable]$Body
     )
 
-    $configPath = Join-Path $HOME '.multica\config.json'
-    if (-not (Test-Path -LiteralPath $configPath)) {
-        throw "Multica config not found at $configPath. Run 'multica login' first."
-    }
-
-    $config = Get-Content -Raw -LiteralPath $configPath -Encoding UTF8 | ConvertFrom-Json
     $headers = @{
-        Authorization = "Bearer $($config.token)"
-        'X-Workspace-Slug' = $WorkspaceSlug
+        Authorization = "Bearer $($env:MULTICA_TOKEN)"
+        'X-Workspace-ID' = $script:WorkspaceId
         'Content-Type' = 'application/json; charset=utf-8'
     }
     $json = $Body | ConvertTo-Json -Depth 20 -Compress
     $bodyBytes = [Text.Encoding]::UTF8.GetBytes($json)
-    return Invoke-RestMethod -Method Put -Uri "$($config.server_url)$Path" -Headers $headers -Body $bodyBytes
+    return Invoke-RestMethod -Method Put -Uri "$ServerUrl$Path" -Headers $headers -Body $bodyBytes
 }
 
 function As-Array {
@@ -102,6 +112,7 @@ function Get-SkillMetadata {
         Name = $nameMatch.Groups[1].Value.Trim()
         Description = $descriptionMatch.Groups[1].Value.Trim()
         Body = $body
+        Path = $Path
     }
 }
 
@@ -129,35 +140,23 @@ function Ensure-Skill {
         [pscustomobject]$Metadata
     )
 
-    $tempContent = [IO.Path]::GetTempFileName()
+    $skillDirectory = Split-Path -Parent $Metadata.Path
+    $tempArchive = Join-Path ([IO.Path]::GetTempPath()) ("multica-skill-{0}.zip" -f [guid]::NewGuid())
     try {
-        [IO.File]::WriteAllText($tempContent, $Metadata.Body, [Text.Encoding]::UTF8)
-        if ($ByName.ContainsKey($Metadata.Name)) {
-            $existing = $ByName[$Metadata.Name]
-            Invoke-MulticaJson @(
-                'skill', 'update', $existing.id,
-                "--description=$($Metadata.Description)",
-                "--content-file=$tempContent",
-                '--output=json'
-            ) | Out-Null
-            $existing.description = $Metadata.Description
-            Write-Host "SYNCED: $($Metadata.Name)"
-            return $existing
-        }
-
-        $created = Invoke-MulticaJson @(
-            'skill', 'create',
-            "--name=$($Metadata.Name)",
-            "--description=$($Metadata.Description)",
-            "--content-file=$tempContent",
-            '--output=json'
+        Compress-Archive -Path (Join-Path $skillDirectory '*') -DestinationPath $tempArchive -CompressionLevel Optimal -Force
+        $result = Invoke-MulticaJson @(
+            'skill', 'import', "--file=$tempArchive", '--on-conflict=overwrite', '--output=json'
         )
-        $ByName[$Metadata.Name] = $created
-        Write-Host "CREATED: $($Metadata.Name)"
-        return $created
+        $skill = if ($null -ne $result.skill) { $result.skill } else { $result }
+        if ($null -eq $skill.id) {
+            throw "Skill import returned no id for $($Metadata.Name)."
+        }
+        $ByName[$Metadata.Name] = $skill
+        Write-Host "SYNCED: $($Metadata.Name)"
+        return $skill
     }
     finally {
-        Remove-Item -LiteralPath $tempContent -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $tempArchive -Force -ErrorAction SilentlyContinue
     }
 }
 
@@ -202,16 +201,20 @@ function Ensure-Agent {
     }
 
     if ($null -eq $existing) {
-        $created = Invoke-MulticaJson @(
+        $agentRuntimeId = Resolve-AgentRuntimeId -LogicalName $Name -DisplayName $displayName -ExistingAgent $null
+        $createArguments = @(
             'agent', 'create',
             "--name=$displayName",
-            "--runtime-id=$RuntimeId",
+            "--runtime-id=$agentRuntimeId",
             "--instructions=$Instructions",
             "--description=$Description",
-            '--model=gpt-5.6-sol',
             '--visibility=private',
             '--output=json'
         )
+        if (-not [string]::IsNullOrWhiteSpace($Model)) {
+            $createArguments += "--model=$Model"
+        }
+        $created = Invoke-MulticaJson $createArguments
         $ByName[$Name] = $created
         $ByName[$displayName] = $created
         Write-Host "CREATED: $Name"
@@ -235,6 +238,59 @@ function Ensure-Agent {
 }
 
 Write-Host "Checking Multica login and current workspace..."
+$workspace = As-Array (Invoke-MulticaJson @('workspace', 'list', '--output', 'json')) |
+    Where-Object { $_.slug -eq $WorkspaceSlug } |
+    Select-Object -First 1
+if ($null -eq $workspace) {
+    throw "Workspace '$WorkspaceSlug' is not visible to the supplied token."
+}
+$script:WorkspaceId = $workspace.id
+$env:MULTICA_WORKSPACE_ID = $script:WorkspaceId
+Write-Host "Target workspace: $($workspace.name) ($WorkspaceSlug / $($script:WorkspaceId))"
+
+$runtimeMap = @{}
+if (-not [string]::IsNullOrWhiteSpace($RuntimeMapFile)) {
+    if (-not (Test-Path -LiteralPath $RuntimeMapFile)) {
+        throw "Runtime map file not found: $RuntimeMapFile"
+    }
+    $runtimeMapObject = [IO.File]::ReadAllText((Resolve-Path $RuntimeMapFile), [Text.Encoding]::UTF8) | ConvertFrom-Json
+    foreach ($property in $runtimeMapObject.PSObject.Properties) {
+        $runtimeMap[$property.Name] = [string]$property.Value
+    }
+}
+
+$runtimeCatalog = As-Array (Invoke-MulticaJson @('runtime', 'list', '--output', 'json'))
+$onlineRuntimes = @($runtimeCatalog | Where-Object { $_.status -eq 'online' -and -not [string]::IsNullOrWhiteSpace($_.id) })
+$script:DefaultRuntimeId = $RuntimeId
+if ([string]::IsNullOrWhiteSpace($script:DefaultRuntimeId) -and $onlineRuntimes.Count -eq 1) {
+    $script:DefaultRuntimeId = [string]$onlineRuntimes[0].id
+    Write-Host "Auto-selected the only online Runtime: $script:DefaultRuntimeId"
+}
+
+function Resolve-AgentRuntimeId {
+    param(
+        [string]$LogicalName,
+        [string]$DisplayName,
+        $ExistingAgent
+    )
+
+    if ($null -ne $ExistingAgent -and -not [string]::IsNullOrWhiteSpace($ExistingAgent.runtime_id)) {
+        return [string]$ExistingAgent.runtime_id
+    }
+    foreach ($key in @($LogicalName, $DisplayName)) {
+        if ($runtimeMap.ContainsKey($key) -and -not [string]::IsNullOrWhiteSpace($runtimeMap[$key])) {
+            return [string]$runtimeMap[$key]
+        }
+    }
+    if (-not [string]::IsNullOrWhiteSpace($script:DefaultRuntimeId)) {
+        return [string]$script:DefaultRuntimeId
+    }
+    if ($onlineRuntimes.Count -eq 0) {
+        throw "No online Runtime is available for new Agent '$DisplayName'. Pass -RuntimeId or -RuntimeMapFile."
+    }
+    throw "Multiple online Runtimes are available for new Agent '$DisplayName'. Pass -RuntimeId for a shared default or -RuntimeMapFile for per-Agent Runtime selection."
+}
+
 $agents = @{}
 foreach ($agent in (As-Array (Invoke-MulticaJson @('agent', 'list', '--include-archived', '--output', 'json')))) {
     $agents[$agent.name] = $agent
@@ -265,11 +321,9 @@ foreach ($logicalName in $standardAgentNames.Keys) {
 }
 
 $squadAliases = @{
-    'Software Development' = @('软件开发小队', 'Software Development')
-    'Software Development Reviewed' = @('软件开发评审小队', 'Software Development Reviewed')
-    'Product Design' = @('产品设计小队', 'Product Design', '产品小队')
-    'Development' = @('开发小队', 'Development')
-    'Bug Fix' = @('Bug 修复小队', 'Bug Fix', 'Bug修正小队')
+    'Product Design' = @('产品设计小队', 'Product Design', '产品小队', 'product-design')
+    'Development' = @('开发小队', 'Development', 'development')
+    'Bug Fix' = @('Bug 修复小队', 'Bug Fix', 'Bug修正小队', 'bug-fix')
 }
 
 foreach ($logicalName in $agentAliases.Keys) {
@@ -394,23 +448,23 @@ foreach ($skillFile in $skillFiles) {
 
 Write-Host "`nAssigning Skills to imported Agents..."
 $skillAssignments = @{
-    Architect = @('multica-technical-design', 'multica-artifact-design-sync')
-    ArchReviewer = @('multica-review-architect')
-    BackendDev = @('multica-implementation', 'multica-artifact-api-sync')
-    BackendReviewer = @('multica-review-backend')
+    Architect = @('multica-technical-design', 'multica-artifact-design-sync', 'multica-platform-opencontent')
+    ArchReviewer = @('multica-review-architect', 'multica-verification', 'multica-artifact-design-sync', 'multica-platform-opencontent')
+    BackendDev = @('multica-implementation', 'multica-artifact-api-sync', 'multica-verification', 'multica-platform-opencontent')
+    BackendReviewer = @('multica-review-backend', 'multica-artifact-api-sync', 'multica-verification', 'multica-platform-opencontent')
     Designer = @('multica-artifact-ui-sync')
-    DesignReviewer = @('multica-review-designer')
-    DevOps = @('multica-artifact-cicd-sync', 'multica-gate-setup')
-    DevelopmentLeader = @('multica-verification', 'multica-requirement-analysis')
-    FrontendDev = @('multica-implementation')
-    FrontendReviewer = @('multica-review-frontend')
-    Leader = @('multica-verification')
-    ProductManager = @('multica-requirement-analysis', 'multica-artifact-req-sync')
-    ProductLeader = @('multica-verification', 'multica-requirement-analysis')
-    ProductReviewer = @('multica-review-product')
-    Reviewer = @()
-    Tester = @('multica-test-design', 'multica-test-automation', 'multica-artifact-test-sync')
-    TestReviewer = @('multica-review-test')
+    DesignReviewer = @('multica-review-designer', 'multica-verification', 'multica-artifact-ui-sync')
+    DevOps = @('multica-artifact-cicd-sync', 'multica-gate-setup', 'multica-platform-jenkins', 'multica-platform-opencontent')
+    DevelopmentLeader = @('multica-verification', 'multica-requirement-analysis', 'multica-technical-design', 'multica-artifact-design-sync', 'multica-artifact-api-sync', 'multica-platform-opencontent')
+    FrontendDev = @('multica-implementation', 'multica-artifact-ui-sync', 'multica-artifact-api-sync', 'multica-verification', 'multica-platform-opencontent')
+    FrontendReviewer = @('multica-review-frontend', 'multica-verification')
+    Leader = @('multica-verification', 'multica-requirement-analysis', 'multica-artifact-req-sync', 'multica-technical-design', 'multica-artifact-design-sync', 'multica-artifact-ui-sync', 'multica-artifact-api-sync', 'multica-test-design', 'multica-artifact-test-sync', 'multica-test-automation', 'multica-artifact-cicd-sync', 'multica-platform-jenkins', 'multica-platform-opencontent')
+    ProductManager = @('multica-requirement-analysis', 'multica-artifact-req-sync', 'multica-platform-opencontent')
+    ProductLeader = @('multica-verification', 'multica-requirement-analysis', 'multica-artifact-req-sync', 'multica-platform-opencontent')
+    ProductReviewer = @('multica-review-product', 'multica-artifact-req-sync', 'multica-verification', 'multica-platform-opencontent')
+    Reviewer = @('multica-verification')
+    Tester = @('multica-test-design', 'multica-test-automation', 'multica-artifact-test-sync', 'multica-platform-opencontent')
+    TestReviewer = @('multica-review-test', 'multica-artifact-test-sync', 'multica-verification', 'multica-platform-opencontent')
 }
 
 foreach ($name in $skillAssignments.Keys) {
@@ -432,35 +486,17 @@ foreach ($name in $skillAssignments.Keys) {
         }
     )
 
-    if ($skillIds.Count -gt 0) {
-        Invoke-MulticaJson @(
-            'agent', 'skills', 'set', $agents[$name].id,
-            "--skill-ids=$($skillIds -join ',')",
-            '--output=json'
-        ) | Out-Null
-        Write-Host "BOUND: $name -> $($skillAssignments[$name] -join ', ')"
-    }
+    Invoke-MulticaJson @(
+        'agent', 'skills', 'set', $agents[$name].id,
+        "--skill-ids=$($skillIds -join ',')",
+        '--output=json'
+    ) | Out-Null
+    Write-Host "BOUND: $name -> $($skillAssignments[$name] -join ', ')"
 }
 
 if (-not $SkipSquads) {
     Write-Host "`nCreating Squads..."
     $squadDefinitions = @(
-        @{
-            Key = 'Software Development'
-            Name = '软件开发小队'
-            Description = '基于中文模板的常规产品开发小队。'
-            Template = 'software-development'
-            Leader = 'DevelopmentLeader'
-            Members = @('ProductManager', 'Architect', 'Designer', 'FrontendDev', 'BackendDev', 'Tester', 'Reviewer', 'DevOps')
-        }
-        @{
-            Key = 'Software Development Reviewed'
-            Name = '软件开发评审小队'
-            Description = '配备专属专业评审员的产品开发小队。'
-            Template = 'software-development-reviewed'
-            Leader = 'Leader'
-            Members = @('ProductManager', 'ProductReviewer', 'Architect', 'ArchReviewer', 'Designer', 'DesignReviewer', 'FrontendDev', 'FrontendReviewer', 'BackendDev', 'BackendReviewer', 'Tester', 'TestReviewer', 'DevOps')
-        }
         @{
             Key = 'Bug Fix'
             Name = 'Bug 修复小队'
@@ -598,6 +634,36 @@ if (-not $SkipSquads) {
 }
 
 Write-Host "`nImport complete."
-Write-Host "Agents: $(@($agents.Values | Sort-Object id -Unique).Count)"
-Write-Host "Skills: $($skills.Count)"
-Write-Host "Squads: $(@($squads.Values | Sort-Object id -Unique).Count)"
+$finalAgents = As-Array (Invoke-MulticaJson @('agent', 'list', '--output', 'json'))
+$finalSkills = As-Array (Invoke-MulticaJson @('skill', 'list', '--output', 'json'))
+$finalSquads = As-Array (Invoke-MulticaJson @('squad', 'list', '--output', 'json'))
+
+$missingAgentNames = @($standardAgentNames.Values | Where-Object { $finalAgents.name -notcontains $_ })
+if ($missingAgentNames.Count -gt 0) {
+    throw "Verification failed; missing Agents: $($missingAgentNames -join ', ')"
+}
+$expectedSkillNames = @($skillFiles | ForEach-Object { (Get-SkillMetadata -Path $_).Name })
+$missingSkillNames = @($expectedSkillNames | Where-Object { $finalSkills.name -notcontains $_ })
+if ($missingSkillNames.Count -gt 0) {
+    throw "Verification failed; missing Skills: $($missingSkillNames -join ', ')"
+}
+foreach ($logicalName in $skillAssignments.Keys) {
+    $displayName = $standardAgentNames[$logicalName]
+    $agent = $finalAgents | Where-Object { $_.name -eq $displayName } | Select-Object -First 1
+    $expected = @($skillAssignments[$logicalName] | Sort-Object)
+    $actual = @($agent.skills.name | Sort-Object)
+    if (@(Compare-Object $expected $actual).Count -gt 0) {
+        throw "Verification failed; Agent '$displayName' Skill assignments do not match the script."
+    }
+}
+if (-not $SkipSquads) {
+    $missingSquadNames = @($squadDefinitions.Name | Where-Object { $finalSquads.name -notcontains $_ })
+    if ($missingSquadNames.Count -gt 0) {
+        throw "Verification failed; missing Squads: $($missingSquadNames -join ', ')"
+    }
+}
+
+Write-Host "Custom Agents: $($standardAgentNames.Count)"
+Write-Host "Skills: $($finalSkills.Count)"
+Write-Host "Managed Squads: $(if ($SkipSquads) { 0 } else { $squadDefinitions.Count })"
+Write-Host 'Verification passed.'

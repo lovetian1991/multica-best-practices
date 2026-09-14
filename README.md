@@ -348,6 +348,7 @@ CI / PR = 什么必须真的通过？
 
 | 文档 | 内容 |
 | --- | --- |
+| [sync-to-multica](docs/zh_CN/sync-to-multica.md) | 用 CLI 将中文 Skill、Agent 和启用中的 Squad 幂等同步到指定 workspace |
 | [where-to-put-things](docs/zh_CN/where-to-put-things.md) | 指令归属速查表（最值得读） |
 | [artifact-conventions](docs/zh_CN/artifact-conventions.md) | 协作产物约定：内容规范 + 对接 skill（平台不写进角色提示词，下沉到 `multica-artifact-*-sync`，换公司只换 skill） |
 | [gates-and-evidence](docs/zh_CN/gates-and-evidence.md) | 门禁 G0–G4（+G2.5 CI/CD）与证据要求 |
