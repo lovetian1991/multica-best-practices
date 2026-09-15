@@ -26,9 +26,10 @@
 
 这样：公开仓库只放内容层 + 编排层 + 平台层**占位壳**；团队接入自己内网时，只填平台层壳子里的 `config.yaml` 与 `scripts/`，上层零改动。
 
-### 标准用法（产品经理 / 技术架构师双 skill 句式）
+### 标准用法（产品经理 / UI/UE设计师 / 技术架构师 skill 句式）
 
 - **@产品经理**：先用 `multica-requirement-analysis` 把 Issue 结构化为带编号的 PRD 内容，再用 `multica-artifact-req-sync` 编排落地（内部调用平台层）。
+- **@UI/UE设计师 / @技术架构师**：补写同一份功能 PRD 后，先把 UI / 技术引用写回 PRD，再用 `multica-artifact-req-sync` 更新知识库中的同一文件；不能只回传设计平台或技术草稿链接。
 - **@技术架构师**：先用 `multica-technical-design` 写本地设计文档，再用 `multica-artifact-design-sync` 发布（内部调用平台层）。
 - **@测试专家**：先用 `multica-test-design` 产出用例内容，再用 `multica-artifact-test-sync` 落地；T3 自动化用 `multica-test-automation`。
 
@@ -39,7 +40,7 @@
 | 产物 | 责任人 | 内容规范（角色侧） | 对接 skill（平台侧，可替换） |
 | --- | --- | --- | --- |
 | UI 设计 | @UI/UE设计师 | 页面结构、状态、交互、标注（对齐 PRD 信息架构） | `multica-artifact-ui-sync`（默认 Figma） |
-| 产品需求 PRD | @产品经理 | 按功能命名为 `prd-<功能名称>.md`，包含 G-/FR-/BR-/AC-/KPI-/RISK-/OP- 编号化需求 | `multica-artifact-req-sync`（默认 Wiki 平台） |
+| 产品需求 PRD | @产品经理（首次）/ @UI/UE设计师、@技术架构师（补写） | 按功能命名为 `prd-<功能名称>.md`，包含 G-/FR-/BR-/AC-/KPI-/RISK-/OP- 编号化需求；所有补写都更新同一文件 | `multica-artifact-req-sync`（默认 Wiki 平台） |
 | 开发设计文档 | @技术架构师 | 当前架构、最小改动、受影响组件、实现步骤、风险 | `multica-artifact-design-sync`（默认 Git 仓库 / Wiki 平台） |
 | API 接口文档 | @后台开发专家 | 端点、入参 / 出参、错误码、鉴权、BR- 对应 | `multica-artifact-api-sync`（默认 API 工具） |
 | 测试用例 / 报告 | @测试专家 | 功能 / 接口用例、覆盖 AC-、测试报告 | `multica-artifact-test-sync`（默认 用例平台） |
@@ -63,7 +64,7 @@
 1. 上游完成后，由 skill 回传**稳定链接 / 路径**；对应小队负责人派活时显式带上该引用（如"读 `<PRD 链接>` 后做 X"），不靠口头约定。
 2. 门禁判词引用产物用「链接 + 编号」（如「`<API 契约链接>` 的 BR-3 缺错误码」），不写"前面那个文档"。
 3. 同一类产物永远用同一个 skill 落地——下游靠 skill 名称 + issue 标识定位，不靠搜索。
-4. 产物被修改后，引用不变、内容更新；下游门禁据此重新判门（见 gates 的「产物变更门禁失效」）。
+4. 产物被修改后，引用不变、内容更新；产品设计小队的共享 PRD 必须先回写知识库并更新 Issue metadata/comment，下游门禁据此重新判门（见 gates 的「产物变更门禁失效」）。
 
 ## 5. 与编号规范的关系
 

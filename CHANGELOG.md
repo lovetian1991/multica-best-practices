@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 本文件记录本项目的所有重要变更。新条目采用中英结合写法（Chinese-first, English alongside）。
 
+## Unreleased - 2026-09-15 · 产品设计闭环回写知识库 / Product design KB write-back loop
+
+### Changed / 变更
+
+- 产品经理、UI/UE设计师和技术架构师每次补写共享 PRD 后，都必须通过 `multica-artifact-req-sync` 更新知识库中的同一文件，并回传最新稳定引用；产品总监只评审该最新引用指向的版本 / ProductManager, Designer, and Architect must update the same knowledge-base PRD via `multica-artifact-req-sync` after each append and return the latest stable reference; ProductLeader reviews the version pointed to by that reference
+- 产品设计交接包新增知识库最新 PRD 链接、Issue metadata/comment 回写和设计后回写失败禁阻规则，中英文 Squad、Agent、Skill 与产物规范保持一致 / Product-design handoff now requires the latest knowledge-base PRD link, Issue metadata/comment write-back, and blocking on failed post-design write-back; bilingual Squad, Agent, Skill, and artifact conventions are aligned
+
 ## Unreleased - 2026-09-03 · 产品小队按需角色依赖 / Product Squad on-demand role dependencies
 
 ### Changed / 变更

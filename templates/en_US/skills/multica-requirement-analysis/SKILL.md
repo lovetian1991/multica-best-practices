@@ -34,6 +34,7 @@ Every feature must trace to at least one FR-, BR- (when applicable), and AC-. Re
 - Designer appends only the UI / UX sections to the same feature PRD after ProductLeader dispatches the role.
 - Architect appends the technical constraints / feasibility sections after ProductManager completes when needed; Architect waits for Designer's released document only when both roles are enabled.
 - Designer and Architect must not edit the same feature PRD concurrently. Standalone UI or technical documents are references or working drafts only and never replace the feature PRD.
+- ProductManager, Designer, and Architect must use `multica-artifact-req-sync` after completing their assigned sections to update the same PRD in the knowledge base and return the latest `internal_link`; no final review or handoff starts before that write-back succeeds.
 - ProductLeader performs the only final review of this same feature PRD; no separate final document is required.
 
 ## Output
@@ -64,7 +65,7 @@ If it is an implementation preference, copy detail, deferrable source material, 
 
 ## Handoff
 
-After the structure is ready, use `multica-artifact-req-sync` to update the reference to this same feature PRD on the team requirement platform (Confluence page + JIRA Story + optional DingTalk). Do not create separate final documents for UI or technical sections; return the stable reference to ProductLeader.
+After the structure is ready, and after each UI / UX or technical section is appended, use `multica-artifact-req-sync` to update this same feature PRD on the team requirement platform and return the latest stable reference to ProductLeader. Do not create separate final documents for UI or technical sections; the latest knowledge-base PRD is the handoff source of truth.
 
 ## Why this works
 

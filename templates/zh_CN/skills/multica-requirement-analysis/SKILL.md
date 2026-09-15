@@ -51,6 +51,7 @@ description: 把 Issue / 诉求结构化为带编号的 PRD 内容。用于 @产
 - UI/UE设计师 仅在 产品总监 派单后，顺序补写同一份功能 PRD 文件的 UI / UX 章节。
 - 技术架构师 在产品经理完成后按需补写同一份功能 PRD 文件的技术约束 / 可行性章节；只有 UI/UE设计师 与技术架构师同时启用时，才需等待 UI/UE设计师 完成并释放文档。
 - UI/UE设计师 与 技术架构师 不得并发修改同一份功能 PRD 文件；独立 UI / 技术文档只能作为引用或工作草稿，不能替代功能 PRD 文件。
+- 产品经理、UI/UE设计师 和技术架构师每次完成对应章节后，都必须用 `multica-artifact-req-sync` 更新知识库中的同一份 PRD，并回传最新 `internal_link`；未完成回写不得进入最终评审或交接。
 - 产品总监 最终只评审同一份功能 PRD 文件，不要求额外的独立最终文档。
 
 正式 PRD 至少包含（详见 @产品经理 角色指令）：一句话定义、背景、目标 G- + KPI-、用户与权限、范围、FR-/BR-/AC-、字段口径、空态 / 异常态 / 无权限态、RISK-/OP-、修订记录。
@@ -84,7 +85,7 @@ description: 把 Issue / 诉求结构化为带编号的 PRD 内容。用于 @产
 
 ## 交接
 
-结构就绪后，用 `multica-artifact-req-sync` skill 将同一份功能 PRD 文件上传/更新到 OpenContent，写入 Multica Issue metadata/comment，并回传稳定 internal_link。
+结构就绪后，以及每次 UI / UX 或技术章节补写后，都用 `multica-artifact-req-sync` skill 将同一份功能 PRD 文件上传/更新到 OpenContent，写入 Multica Issue metadata/comment，并回传最新稳定 internal_link。
 
 > @产品经理：「先用 `multica-requirement-analysis` 结构化 PRD，再用 `multica-artifact-req-sync` 落地并回传链接。」
 

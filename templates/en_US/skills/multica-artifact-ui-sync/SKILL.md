@@ -9,6 +9,8 @@ description: Land UI / interaction design artifacts to the design collaboration 
 
 Land UI design artifacts to the team's unified design platform and let downstream (frontend) retrieve them via a stable reference.
 
+In the Product Design Squad, the design-platform link is the UI source reference; the final knowledge-base archive remains the same feature PRD with that reference appended. After finishing, @Designer must update that PRD again via `multica-artifact-req-sync`.
+
 > This skill decouples "platform integration" from "role prompt": the role prompt only says "produce UI design", not which platform. Changing companies (Zeplin / 蓝湖 / MasterGo) means editing only this skill, not the @Designer prompt.
 
 ## Default platform: Figma

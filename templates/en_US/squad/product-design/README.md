@@ -74,7 +74,7 @@ Rework follows the complexity budget: one round for L1, two for L2, and three fo
 | --- | --- | --- |
 | `multica-verification` | ProductLeader | General gates and cross-artifact consistency |
 | `multica-requirement-analysis` | ProductManager | Structure the problem and idea into a product definition |
-| `multica-artifact-req-sync` | ProductManager | Land the PRD and return a stable reference |
+| `multica-artifact-req-sync` | ProductManager, Designer, Architect | Initially land and subsequently update the same PRD in the knowledge base, returning the latest stable reference |
 | `multica-artifact-ui-sync` | Designer | Land UI / interaction design |
 | `multica-technical-design` | Architect | Technical feasibility and constraints |
 | `multica-artifact-design-sync` | Architect | Land technical design |
@@ -107,7 +107,7 @@ Copy [`issue.md`](./issue.md) into a new Issue. Prefer the problem, goal, change
 P0 triage
   → P1 ProductManager product definition
   → ProductLeader decides whether Designer / Architect are needed
-  → UI / interaction and/or technical feasibility work as needed (no intermediate review)
+  → UI / interaction and/or technical feasibility work as needed, updating the same PRD in the knowledge base (no intermediate review)
   → P4 ProductLeader final unified review
   → Human confirmation and handoff
 ```
@@ -122,6 +122,7 @@ The completed package includes at least:
 - normal, empty, error, and no-permission states;
 - UI / interaction references when applicable;
 - technical feasibility, dependencies, and constraints when applicable;
+- the latest stable knowledge-base link to the same PRD;
 - final ProductLeader verdict on the product definition, UI / interaction, and technical design;
 - closed OP items and items still awaiting Human decisions;
 - development split suggestions, risks, and verification concerns.
@@ -153,6 +154,7 @@ Only a Human confirms product scope and sends the package into development. Revi
 - Drawing screens before defining the user problem, scope, and business rules;
 - Letting ProductManager, Designer, and Architect edit the same product decisions;
 - Reusing an old PASS after UI or technical constraints change;
+- Returning only a design-platform link after design, without writing the updated PRD back to the knowledge base;
 - Sending development a requirement while blocking OP items remain open.
 
 ## Directory

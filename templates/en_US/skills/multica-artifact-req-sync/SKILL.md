@@ -1,6 +1,6 @@
 ---
 name: multica-artifact-req-sync
-description: Land product requirement / PRD artifacts to the requirement knowledge platform (default Confluence). Used by @ProductManager to upload PRD and return a link for downstream design / dev / test consumption. Swappable platform.
+description: Land product requirement / PRD artifacts to the requirement knowledge platform (default Confluence). Used by @ProductManager, @Designer, and @Architect to update the shared PRD and return a stable link for downstream consumption. Swappable platform.
 ---
 
 # Artifact · Requirement Sync
@@ -32,7 +32,11 @@ PRD at least contains (see @ProductManager role instruction): one-line definitio
 
 ## Usage (role side writes only this line)
 
-> @ProductManager: "Produce PRD, land it via `multica-artifact-req-sync` skill to the team requirement platform, and return the page link."
+> @ProductManager / @Designer / @Architect: "Update the shared feature PRD, land the latest version via `multica-artifact-req-sync` skill to the team requirement platform, and return the latest stable link."
+
+After Designer or Architect appends a section, the role must write any UI / technical reference back into the same PRD and run this Skill again. A design-platform link or standalone technical draft alone does not complete the product-design handoff.
+
+Fixed append-sync order: re-read the latest Issue status and metadata → fetch the current PRD through the latest `internal_link` → append only the assigned section → preserve the original filename and update it with `--reference` → write the returned metadata/comment back to the Issue. Any failure returns `BLOCKED`; do not start final review or handoff.
 
 ## Swap platform (no role-prompt change)
 
