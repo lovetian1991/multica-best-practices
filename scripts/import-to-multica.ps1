@@ -134,6 +134,38 @@ function Add-IfMissing {
     return $created
 }
 
+function New-SkillArchive {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourceDirectory,
+        [Parameter(Mandatory = $true)][string]$ArchivePath
+    )
+
+    Add-Type -AssemblyName System.IO.Compression
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $sourceRoot = (Resolve-Path -LiteralPath $SourceDirectory).Path.TrimEnd('\', '/')
+    $fileStream = [IO.File]::Open($ArchivePath, [IO.FileMode]::Create, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
+    $archive = [IO.Compression.ZipArchive]::new($fileStream, [IO.Compression.ZipArchiveMode]::Create, $false)
+    try {
+        foreach ($file in Get-ChildItem -LiteralPath $sourceRoot -Recurse -File) {
+            $relative = $file.FullName.Substring($sourceRoot.Length).TrimStart('\', '/') -replace '\\', '/'
+            $entry = $archive.CreateEntry($relative, [IO.Compression.CompressionLevel]::Optimal)
+            $input = [IO.File]::OpenRead($file.FullName)
+            $output = $entry.Open()
+            try {
+                $input.CopyTo($output)
+            }
+            finally {
+                $output.Dispose()
+                $input.Dispose()
+            }
+        }
+    }
+    finally {
+        $archive.Dispose()
+        $fileStream.Dispose()
+    }
+}
+
 function Ensure-Skill {
     param(
         [hashtable]$ByName,
@@ -143,7 +175,7 @@ function Ensure-Skill {
     $skillDirectory = Split-Path -Parent $Metadata.Path
     $tempArchive = Join-Path ([IO.Path]::GetTempPath()) ("multica-skill-{0}.zip" -f [guid]::NewGuid())
     try {
-        Compress-Archive -Path (Join-Path $skillDirectory '*') -DestinationPath $tempArchive -CompressionLevel Optimal -Force
+        New-SkillArchive -SourceDirectory $skillDirectory -ArchivePath $tempArchive
         $result = Invoke-MulticaJson @(
             'skill', 'import', "--file=$tempArchive", '--on-conflict=overwrite', '--output=json'
         )

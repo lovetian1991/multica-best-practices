@@ -105,6 +105,8 @@ $env:MULTICA_TOKEN = '<multica-cli-token>'
 5. 创建或更新 3 个启用中的 Squad，写入中文名称、中文描述、Instructions 和成员列表。
 6. 输出 Agent、Skill 和 Squad 数量。
 
+脚本使用 ZIP API 写入 `/` 分隔的 Skill 文件路径。不要改回 PowerShell `Compress-Archive` 的直接输出方式；Windows 生成的反斜杠路径会被 Daemon 的 bundle 校验拒绝，表现为 `resolve skill bundle returned invalid bundle`。
+
 ## 同步后检查
 
 ```powershell
