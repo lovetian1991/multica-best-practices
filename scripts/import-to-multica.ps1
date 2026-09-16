@@ -5,7 +5,9 @@
     [string]$Model = $(if ($env:MULTICA_AGENT_MODEL) { $env:MULTICA_AGENT_MODEL } else { '' }),
     [string]$RuntimeMapFile = $(if ($env:MULTICA_RUNTIME_MAP_FILE) { $env:MULTICA_RUNTIME_MAP_FILE } else { '' }),
     [switch]$SkipSquads,
-    [switch]$AgentsOnly
+    [switch]$AgentsOnly,
+    [switch]$SkillsOnly,
+    [string[]]$SkillName = @()
 )
 
 $ErrorActionPreference = 'Stop'
@@ -19,6 +21,36 @@ if ([string]::IsNullOrWhiteSpace($ServerUrl)) {
 if ([string]::IsNullOrWhiteSpace($env:MULTICA_TOKEN)) {
     throw 'MULTICA_TOKEN is required. Set it for the current process; never store it in this repository.'
 }
+if ($AgentsOnly -and $SkillsOnly) {
+    throw 'Pass either -AgentsOnly or -SkillsOnly, not both.'
+}
+
+# `powershell -File script.ps1 -SkillName a,b` hands the comma list over as one
+# string, so accept both "-SkillName a,b" and repeated "-SkillName a -SkillName b".
+$SkillName = @(
+    $SkillName |
+        ForEach-Object { $_ -split ',' } |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+        Select-Object -Unique
+)
+
+# Scope selection. A Skills-only or subset run must not touch Agents, their
+# Skill assignments or Squads: those are replace-all writes, so running them
+# next to a partial Skill list would rewrite objects the caller did not ask for.
+$subsetSkills = $SkillName.Count -gt 0
+if ($AgentsOnly -and $subsetSkills) {
+    throw '-SkillName selects Skills; it cannot be combined with -AgentsOnly.'
+}
+$runAgents = -not $SkillsOnly -and -not $subsetSkills
+$runSkills = -not $AgentsOnly
+$runAssignments = $runAgents -and -not $AgentsOnly
+$runSquads = $runAgents -and -not $SkipSquads
+
+# The CLI emits UTF-8. PowerShell 5.1 decodes a native command's stdout with
+# [Console]::OutputEncoding (a CJK codepage on Chinese Windows), which mangles
+# the Chinese names in the JSON and makes ConvertFrom-Json reject it.
+[Console]::OutputEncoding = [Text.Encoding]::UTF8
 
 $ServerUrl = $ServerUrl.TrimEnd('/')
 $env:MULTICA_SERVER_URL = $ServerUrl
@@ -281,22 +313,25 @@ $env:MULTICA_WORKSPACE_ID = $script:WorkspaceId
 Write-Host "Target workspace: $($workspace.name) ($WorkspaceSlug / $($script:WorkspaceId))"
 
 $runtimeMap = @{}
-if (-not [string]::IsNullOrWhiteSpace($RuntimeMapFile)) {
-    if (-not (Test-Path -LiteralPath $RuntimeMapFile)) {
-        throw "Runtime map file not found: $RuntimeMapFile"
-    }
-    $runtimeMapObject = [IO.File]::ReadAllText((Resolve-Path $RuntimeMapFile), [Text.Encoding]::UTF8) | ConvertFrom-Json
-    foreach ($property in $runtimeMapObject.PSObject.Properties) {
-        $runtimeMap[$property.Name] = [string]$property.Value
-    }
-}
-
-$runtimeCatalog = As-Array (Invoke-MulticaJson @('runtime', 'list', '--output', 'json'))
-$onlineRuntimes = @($runtimeCatalog | Where-Object { $_.status -eq 'online' -and -not [string]::IsNullOrWhiteSpace($_.id) })
+$onlineRuntimes = @()
 $script:DefaultRuntimeId = $RuntimeId
-if ([string]::IsNullOrWhiteSpace($script:DefaultRuntimeId) -and $onlineRuntimes.Count -eq 1) {
-    $script:DefaultRuntimeId = [string]$onlineRuntimes[0].id
-    Write-Host "Auto-selected the only online Runtime: $script:DefaultRuntimeId"
+if ($runAgents) {
+    if (-not [string]::IsNullOrWhiteSpace($RuntimeMapFile)) {
+        if (-not (Test-Path -LiteralPath $RuntimeMapFile)) {
+            throw "Runtime map file not found: $RuntimeMapFile"
+        }
+        $runtimeMapObject = [IO.File]::ReadAllText((Resolve-Path $RuntimeMapFile), [Text.Encoding]::UTF8) | ConvertFrom-Json
+        foreach ($property in $runtimeMapObject.PSObject.Properties) {
+            $runtimeMap[$property.Name] = [string]$property.Value
+        }
+    }
+
+    $runtimeCatalog = As-Array (Invoke-MulticaJson @('runtime', 'list', '--output', 'json'))
+    $onlineRuntimes = @($runtimeCatalog | Where-Object { $_.status -eq 'online' -and -not [string]::IsNullOrWhiteSpace($_.id) })
+    if ([string]::IsNullOrWhiteSpace($script:DefaultRuntimeId) -and $onlineRuntimes.Count -eq 1) {
+        $script:DefaultRuntimeId = [string]$onlineRuntimes[0].id
+        Write-Host "Auto-selected the only online Runtime: $script:DefaultRuntimeId"
+    }
 }
 
 function Resolve-AgentRuntimeId {
@@ -324,19 +359,26 @@ function Resolve-AgentRuntimeId {
 }
 
 $agents = @{}
-foreach ($agent in (As-Array (Invoke-MulticaJson @('agent', 'list', '--include-archived', '--output', 'json')))) {
-    $agents[$agent.name] = $agent
-}
-
 $skills = @{}
-foreach ($skill in (As-Array (Invoke-MulticaJson @('skill', 'list', '--output', 'json')))) {
-    $skills[$skill.name] = $skill
+$squads = @{}
+
+if ($runAgents) {
+    foreach ($agent in (As-Array (Invoke-MulticaJson @('agent', 'list', '--include-archived', '--output', 'json')))) {
+        $agents[$agent.name] = $agent
+    }
 }
 
-$squads = @{}
-foreach ($squad in (As-Array (Invoke-MulticaJson @('squad', 'list', '--output', 'json')))) {
-    if (-not $squads.ContainsKey($squad.name)) {
-        $squads[$squad.name] = $squad
+if ($runSkills) {
+    foreach ($skill in (As-Array (Invoke-MulticaJson @('skill', 'list', '--output', 'json')))) {
+        $skills[$skill.name] = $skill
+    }
+}
+
+if ($runSquads) {
+    foreach ($squad in (As-Array (Invoke-MulticaJson @('squad', 'list', '--output', 'json')))) {
+        if (-not $squads.ContainsKey($squad.name)) {
+            $squads[$squad.name] = $squad
+        }
     }
 }
 
@@ -358,54 +400,58 @@ $squadAliases = @{
     'Bug Fix' = @('Bug 修复小队', 'Bug Fix', 'Bug修正小队', 'bug-fix')
 }
 
-foreach ($logicalName in $agentAliases.Keys) {
-    $candidates = @(
-        foreach ($candidateName in $agentAliases[$logicalName]) {
-            if ($agents.ContainsKey($candidateName)) {
-                $agents[$candidateName]
+if ($runAgents) {
+    foreach ($logicalName in $agentAliases.Keys) {
+        $candidates = @(
+            foreach ($candidateName in $agentAliases[$logicalName]) {
+                if ($agents.ContainsKey($candidateName)) {
+                    $agents[$candidateName]
+                }
             }
+        )
+        $resolved = $candidates | Where-Object { $null -eq $_.archived_at } | Select-Object -First 1
+        if ($null -ne $resolved) {
+            $agents[$logicalName] = $resolved
         }
-    )
-    $resolved = $candidates | Where-Object { $null -eq $_.archived_at } | Select-Object -First 1
-    if ($null -ne $resolved) {
-        $agents[$logicalName] = $resolved
+    }
+
+    # Migrate an existing logical/legacy object to the canonical display name.
+    # If the canonical object already exists, alias resolution above selected it,
+    # so this never merges or deletes duplicate objects.
+    foreach ($logicalName in $standardAgentNames.Keys) {
+        if (-not $agents.ContainsKey($logicalName)) {
+            continue
+        }
+
+        $agent = $agents[$logicalName]
+        $displayName = $standardAgentNames[$logicalName]
+        if ($agent.name -eq $displayName) {
+            continue
+        }
+
+        if ($null -ne $agent.archived_at) {
+            Write-Host "SKIP archived rename: $logicalName -> $displayName"
+            continue
+        }
+
+        Invoke-MulticaJson @(
+            'agent', 'update', $agent.id,
+            "--name=$displayName",
+            '--output=json'
+        ) | Out-Null
+        $agent.name = $displayName
+        $agents[$displayName] = $agent
+        Write-Host "RENAMED: $logicalName -> $displayName"
     }
 }
 
-# Migrate an existing logical/legacy object to the canonical display name.
-# If the canonical object already exists, alias resolution above selected it,
-# so this never merges or deletes duplicate objects.
-foreach ($logicalName in $standardAgentNames.Keys) {
-    if (-not $agents.ContainsKey($logicalName)) {
-        continue
-    }
-
-    $agent = $agents[$logicalName]
-    $displayName = $standardAgentNames[$logicalName]
-    if ($agent.name -eq $displayName) {
-        continue
-    }
-
-    if ($null -ne $agent.archived_at) {
-        Write-Host "SKIP archived rename: $logicalName -> $displayName"
-        continue
-    }
-
-    Invoke-MulticaJson @(
-        'agent', 'update', $agent.id,
-        "--name=$displayName",
-        '--output=json'
-    ) | Out-Null
-    $agent.name = $displayName
-    $agents[$displayName] = $agent
-    Write-Host "RENAMED: $logicalName -> $displayName"
-}
-
-foreach ($logicalName in $squadAliases.Keys) {
-    foreach ($candidateName in $squadAliases[$logicalName]) {
-        if ($squads.ContainsKey($candidateName)) {
-            $squads[$logicalName] = $squads[$candidateName]
-            break
+if ($runSquads) {
+    foreach ($logicalName in $squadAliases.Keys) {
+        foreach ($candidateName in $squadAliases[$logicalName]) {
+            if ($squads.ContainsKey($candidateName)) {
+                $squads[$logicalName] = $squads[$candidateName]
+                break
+            }
         }
     }
 }
@@ -450,16 +496,18 @@ $agentDescriptions = @{
     TestReviewer = '独立评审测试用例与测试报告。'
 }
 
-Write-Host "`nImporting Agents..."
-$agentFiles = Get-ChildItem -LiteralPath (Join-Path $repoRoot 'templates\zh_CN\agents') -Filter '*.md' -File | Sort-Object Name
-foreach ($file in $agentFiles) {
-    $name = $agentNames[$file.Name]
-    if ([string]::IsNullOrWhiteSpace($name)) {
-        throw "No agent name mapping for $($file.Name)."
-    }
+if ($runAgents) {
+    Write-Host "`nImporting Agents..."
+    $agentFiles = Get-ChildItem -LiteralPath (Join-Path $repoRoot 'templates\zh_CN\agents') -Filter '*.md' -File | Sort-Object Name
+    foreach ($file in $agentFiles) {
+        $name = $agentNames[$file.Name]
+        if ([string]::IsNullOrWhiteSpace($name)) {
+            throw "No agent name mapping for $($file.Name)."
+        }
 
-    $instructions = Get-MarkdownCodeBlock -Path $file.FullName
-    Ensure-Agent -ByName $agents -Name $name -Instructions $instructions -Description $agentDescriptions[$name] | Out-Null
+        $instructions = Get-MarkdownCodeBlock -Path $file.FullName
+        Ensure-Agent -ByName $agents -Name $name -Instructions $instructions -Description $agentDescriptions[$name] | Out-Null
+    }
 }
 
 if ($AgentsOnly) {
@@ -473,12 +521,27 @@ $skillFiles = Get-ChildItem -LiteralPath (Join-Path $repoRoot 'templates\zh_CN\s
     Where-Object { Test-Path -LiteralPath $_ } |
     Sort-Object
 
-foreach ($skillFile in $skillFiles) {
-    $metadata = Get-SkillMetadata -Path $skillFile
+$skillMetadata = @($skillFiles | ForEach-Object { Get-SkillMetadata -Path $_ })
+
+# Resolve -SkillName against the local templates before any write, so a typo
+# fails loudly instead of silently syncing nothing.
+if ($subsetSkills) {
+    $availableSkillNames = @($skillMetadata | ForEach-Object { $_.Name })
+    $requestedSkillNames = @($SkillName | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+    $unknownSkillNames = @($requestedSkillNames | Where-Object { $availableSkillNames -notcontains $_ })
+    if ($unknownSkillNames.Count -gt 0) {
+        throw "Unknown Skill name(s): $($unknownSkillNames -join ', '). Names must match the 'name:' field in templates\zh_CN\skills\*\SKILL.md."
+    }
+    Write-Host "Subset sync: $($requestedSkillNames -join ', ')"
+}
+
+foreach ($metadata in $skillMetadata) {
+    if ($subsetSkills -and $SkillName -notcontains $metadata.Name) {
+        continue
+    }
     Ensure-Skill -ByName $skills -Metadata $metadata | Out-Null
 }
 
-Write-Host "`nAssigning Skills to imported Agents..."
 $skillAssignments = @{
     Architect = @('multica-technical-design', 'multica-artifact-design-sync', 'multica-platform-opencontent')
     ArchReviewer = @('multica-review-architect', 'multica-verification', 'multica-artifact-design-sync', 'multica-platform-opencontent')
@@ -499,34 +562,37 @@ $skillAssignments = @{
     TestReviewer = @('multica-review-test', 'multica-artifact-test-sync', 'multica-verification', 'multica-platform-opencontent')
 }
 
-foreach ($name in $skillAssignments.Keys) {
-    if (-not $agents.ContainsKey($name)) {
-        Write-Host "SKIP skills for missing agent (no create): $name"
-        continue
-    }
-    if ($null -ne $agents[$name].archived_at) {
-        Write-Host "SKIP skills for archived agent: $name"
-        continue
-    }
-
-    $skillIds = @(
-        foreach ($skillName in $skillAssignments[$name]) {
-            if (-not $skills.ContainsKey($skillName)) {
-                throw "Skill $skillName is missing; cannot assign it to $name."
-            }
-            $skills[$skillName].id
+if ($runAssignments) {
+    Write-Host "`nAssigning Skills to imported Agents..."
+    foreach ($name in $skillAssignments.Keys) {
+        if (-not $agents.ContainsKey($name)) {
+            Write-Host "SKIP skills for missing agent (no create): $name"
+            continue
         }
-    )
+        if ($null -ne $agents[$name].archived_at) {
+            Write-Host "SKIP skills for archived agent: $name"
+            continue
+        }
 
-    Invoke-MulticaJson @(
-        'agent', 'skills', 'set', $agents[$name].id,
-        "--skill-ids=$($skillIds -join ',')",
-        '--output=json'
-    ) | Out-Null
-    Write-Host "BOUND: $name -> $($skillAssignments[$name] -join ', ')"
+        $skillIds = @(
+            foreach ($skillName in $skillAssignments[$name]) {
+                if (-not $skills.ContainsKey($skillName)) {
+                    throw "Skill $skillName is missing; cannot assign it to $name."
+                }
+                $skills[$skillName].id
+            }
+        )
+
+        Invoke-MulticaJson @(
+            'agent', 'skills', 'set', $agents[$name].id,
+            "--skill-ids=$($skillIds -join ',')",
+            '--output=json'
+        ) | Out-Null
+        Write-Host "BOUND: $name -> $($skillAssignments[$name] -join ', ')"
+    }
 }
 
-if (-not $SkipSquads) {
+if ($runSquads) {
     Write-Host "`nCreating Squads..."
     $squadDefinitions = @(
         @{
@@ -666,36 +732,51 @@ if (-not $SkipSquads) {
 }
 
 Write-Host "`nImport complete."
-$finalAgents = As-Array (Invoke-MulticaJson @('agent', 'list', '--output', 'json'))
-$finalSkills = As-Array (Invoke-MulticaJson @('skill', 'list', '--output', 'json'))
-$finalSquads = As-Array (Invoke-MulticaJson @('squad', 'list', '--output', 'json'))
+# Verification covers only the objects this run was asked to change, so a
+# partial sync cannot fail on objects it deliberately left alone.
+$expectedSkillNames = @(
+    $skillMetadata |
+        Where-Object { -not $subsetSkills -or $SkillName -contains $_.Name } |
+        ForEach-Object { $_.Name }
+)
 
-$missingAgentNames = @($standardAgentNames.Values | Where-Object { $finalAgents.name -notcontains $_ })
-if ($missingAgentNames.Count -gt 0) {
-    throw "Verification failed; missing Agents: $($missingAgentNames -join ', ')"
-}
-$expectedSkillNames = @($skillFiles | ForEach-Object { (Get-SkillMetadata -Path $_).Name })
-$missingSkillNames = @($expectedSkillNames | Where-Object { $finalSkills.name -notcontains $_ })
-if ($missingSkillNames.Count -gt 0) {
-    throw "Verification failed; missing Skills: $($missingSkillNames -join ', ')"
-}
-foreach ($logicalName in $skillAssignments.Keys) {
-    $displayName = $standardAgentNames[$logicalName]
-    $agent = $finalAgents | Where-Object { $_.name -eq $displayName } | Select-Object -First 1
-    $expected = @($skillAssignments[$logicalName] | Sort-Object)
-    $actual = @($agent.skills.name | Sort-Object)
-    if (@(Compare-Object $expected $actual).Count -gt 0) {
-        throw "Verification failed; Agent '$displayName' Skill assignments do not match the script."
+if ($runAgents) {
+    $finalAgents = As-Array (Invoke-MulticaJson @('agent', 'list', '--output', 'json'))
+    $missingAgentNames = @($standardAgentNames.Values | Where-Object { $finalAgents.name -notcontains $_ })
+    if ($missingAgentNames.Count -gt 0) {
+        throw "Verification failed; missing Agents: $($missingAgentNames -join ', ')"
     }
 }
-if (-not $SkipSquads) {
+
+if ($runSkills) {
+    $finalSkills = As-Array (Invoke-MulticaJson @('skill', 'list', '--output', 'json'))
+    $missingSkillNames = @($expectedSkillNames | Where-Object { $finalSkills.name -notcontains $_ })
+    if ($missingSkillNames.Count -gt 0) {
+        throw "Verification failed; missing Skills: $($missingSkillNames -join ', ')"
+    }
+}
+
+if ($runAssignments) {
+    foreach ($logicalName in $skillAssignments.Keys) {
+        $displayName = $standardAgentNames[$logicalName]
+        $agent = $finalAgents | Where-Object { $_.name -eq $displayName } | Select-Object -First 1
+        $expected = @($skillAssignments[$logicalName] | Sort-Object)
+        $actual = @($agent.skills.name | Sort-Object)
+        if (@(Compare-Object $expected $actual).Count -gt 0) {
+            throw "Verification failed; Agent '$displayName' Skill assignments do not match the script."
+        }
+    }
+}
+
+if ($runSquads) {
+    $finalSquads = As-Array (Invoke-MulticaJson @('squad', 'list', '--output', 'json'))
     $missingSquadNames = @($squadDefinitions.Name | Where-Object { $finalSquads.name -notcontains $_ })
     if ($missingSquadNames.Count -gt 0) {
         throw "Verification failed; missing Squads: $($missingSquadNames -join ', ')"
     }
 }
 
-Write-Host "Custom Agents: $($standardAgentNames.Count)"
-Write-Host "Skills: $($finalSkills.Count)"
-Write-Host "Managed Squads: $(if ($SkipSquads) { 0 } else { $squadDefinitions.Count })"
+Write-Host "Custom Agents: $(if ($runAgents) { $standardAgentNames.Count } else { 'not changed' })"
+Write-Host "Skills: $(if ($runSkills) { "$($expectedSkillNames.Count) synced / $($finalSkills.Count) online" } else { 'not changed' })"
+Write-Host "Managed Squads: $(if ($runSquads) { $squadDefinitions.Count } else { 'not changed' })"
 Write-Host 'Verification passed.'

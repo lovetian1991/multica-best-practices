@@ -96,6 +96,26 @@ $env:MULTICA_TOKEN = '<multica-cli-token>'
 .\scripts\import-to-multica.ps1 -SkipSquads
 ```
 
+## 部分导入
+
+同步全部 Skill 会重写 26 个 Skill 对象，并连带执行 Agent 能力 replace-all 和 Squad 更新。只改了几个 Skill 时，用 `-SkillName` 指定要导入的 Skill，其余对象完全不碰。
+
+```powershell
+# 只导入指定的 Skill，不处理 Agent / 能力绑定 / Squad
+.\scripts\import-to-multica.ps1 -SkillName multica-platform-opencontent,multica-artifact-req-sync
+
+# 导入全部 Skill，但不处理 Agent / 能力绑定 / Squad
+.\scripts\import-to-multica.ps1 -SkillsOnly
+```
+
+规则：
+
+- `-SkillName` 的取值是 `templates/zh_CN/skills/*/SKILL.md` 中 `name:` 字段的值。名字不存在时脚本在**任何写入之前**报错，不会静默同步 0 个对象。
+- `-SkillName` 与 `-SkillsOnly` 都隐含「只动 Skill」：不创建或更新 Agent，不执行 `$skillAssignments` 的 replace-all，也不更新 Squad。因为这三者都是整体覆盖写，与部分 Skill 列表同时执行会改写调用方没要求的对象。
+- `-SkillName` 可与 `-SkillsOnly` 以外的参数共存，但不能和 `-AgentsOnly` 一起用；`-AgentsOnly` 与 `-SkillsOnly` 互斥。
+- 校验只覆盖本次作用域内的对象。部分导入不会因为未同步的 Skill 或 Agent 而报错。
+- 兼容 `-SkillName a,b` 和 `-SkillName a -SkillName b` 两种写法。
+
 ## 同步顺序
 
 1. 验证 token、API 地址和 workspace slug，并解析 workspace ID。
