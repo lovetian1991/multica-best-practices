@@ -26,9 +26,10 @@ To make "switch company, switch only the skill" actually hold, artifact landing 
 
 So: the public repo ships only content + orchestration + **platform-layer placeholder shells**; a team onboarding its own internal network only fills the shell's `config.yaml` and `scripts/`, with zero changes upstream.
 
-### Standard usage (PM / Architect dual-skill phrasing)
+### Standard usage (PM / Designer / Architect skill phrasing)
 
 - **@ProductManager**: first structure the Issue into a numbered PRD with `multica-requirement-analysis`, then land it via `multica-artifact-req-sync` (which calls the platform layer internally).
+- **@Designer / @Architect**: after appending to the shared feature PRD, write UI / technical references back into that PRD, then use `multica-artifact-req-sync` to update the same file in the knowledge base; a design-platform or technical-draft link alone is not sufficient.
 - **@Architect**: first write the local design doc with `multica-technical-design`, then publish via `multica-artifact-design-sync`.
 - **@Tester**: first produce cases with `multica-test-design`, then land via `multica-artifact-test-sync`; T3 automation uses `multica-test-automation`.
 
@@ -39,7 +40,7 @@ The "analysis / design" skills own **content**; the "artifact-sync" skills own *
 | Artifact | Owner | Content spec (role side) | Sync skill (platform side, swappable) |
 | --- | --- | --- | --- |
 | UI design | @Designer | page structure, states, interaction, annotations (aligned to PRD IA) | `multica-artifact-ui-sync` (default Figma) |
-| Product requirement PRD | @ProductManager | Feature-named `prd-<feature-name>.md` using a short, readable Chinese feature name, with G-/FR-/BR-/AC-/KPI-/RISK-/OP- numbered requirements | `multica-artifact-req-sync` (default Wiki platform) |
+| Product requirement PRD | @ProductManager (initial) / @Designer, @Architect (append) | Feature-named `prd-<feature-name>.md` using a short, readable Chinese feature name, with G-/FR-/BR-/AC-/KPI-/RISK-/OP- numbered requirements; all additions update the same file | `multica-artifact-req-sync` (default Wiki platform) |
 | Technical design doc | @Architect | current arch, minimal change, affected components, steps, risks | `multica-artifact-design-sync` (default Git repo / Wiki platform) |
 | API contract | @BackendDev | endpoints, in/out params, error codes, auth, BR- mapping | `multica-artifact-api-sync` (default API tool) |
 | Test cases / report | @Tester | feature/api cases, AC- coverage, test report | `multica-artifact-test-sync` (default case platform) |
@@ -63,7 +64,7 @@ No platform name, no local path, no "upload to XXX".
 1. After upstream finishes, the skill returns a **stable link/path**; the Leader includes that reference explicitly when dispatching (e.g. "read `<PRD link>` then do X"), never by word of mouth.
 2. Gate verdicts reference artifacts by "link + id" (e.g. "`<API contract link>` BR-3 missing error code"), not "that doc earlier".
 3. The same artifact type always lands via the same skill — downstream locates by skill name + issue id, not by search.
-4. When an artifact is modified, the reference stays, content updates; downstream gates must re-judge (see gates' "artifact change invalidates gate").
+4. When an artifact is modified, the reference stays, content updates; for the Product Design Squad's shared PRD, write the update back to the knowledge base and Issue metadata/comment first, then downstream gates must re-judge (see gates' "artifact change invalidates gate").
 
 ## 5. Relation to the numbering spec
 
