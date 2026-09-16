@@ -12,10 +12,10 @@ metadata:
 
 ```bash
 python "$MULTICA_SKILLS_ROOT/multica-platform-opencontent/scripts/publish-artifacts.py" \
-  --type test-cases --workspace <WORKSPACE_SLUG> --issue <ISSUE-KEY> \
+  --type test-cases \
   --file docs/test-cases/<ISSUE-KEY>/cases.md --root-folder-id <ROOT_FOLDER_ID> --json
 python "$MULTICA_SKILLS_ROOT/multica-platform-opencontent/scripts/publish-artifacts.py" \
-  --type test-reports --workspace <WORKSPACE_SLUG> --issue <ISSUE-KEY> \
+  --type test-reports \
   --file docs/test-reports/<ISSUE-KEY>/report.md --root-folder-id <ROOT_FOLDER_ID> --json
 ```
 

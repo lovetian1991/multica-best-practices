@@ -4,13 +4,43 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
-from oc_common import command_help, emit, first_value, items, run_oc
+from urllib.parse import urlsplit
+
+from oc_common import command_help, emit, first_value, items, load_config, resolve_env, run_oc
 
 
 TYPES = ("requirement", "design", "api", "test-cases", "test-reports", "cicd")
+
+
+def resolve_link_base() -> str:
+    """Browser-facing address of the KB platform.
+
+    oc.js builds the preview link from MULTICA_SERVER_URL, which is the Multica
+    API facade. The KB UI lives on its own address, so it has to come from
+    config; an empty value keeps the CLI's URL unchanged.
+    """
+    cfg = load_config().get("opencontent", {})
+    value = resolve_env(cfg.get("internal_link_base_url")) or os.environ.get("OPENCONTENT_WEB_URL", "")
+    return value.strip().rstrip("/")
+
+
+def apply_link_base(url: str, base: str) -> str:
+    """Replace the link origin, keeping path, query and the preview fragment."""
+    if not base:
+        return url
+    if not base.startswith(("http://", "https://")):
+        raise RuntimeError(f"internal_link_base_url must be an absolute http(s) URL: {base!r}")
+    parsed = urlsplit(url)
+    suffix = parsed.path
+    if parsed.query:
+        suffix += f"?{parsed.query}"
+    if parsed.fragment:
+        suffix += f"#{parsed.fragment}"
+    return f"{base}{suffix}"
 
 
 def load_reference(path: str | None) -> dict:
@@ -21,7 +51,7 @@ def load_reference(path: str | None) -> dict:
 
 def resolve_folder(args: argparse.Namespace) -> dict:
     script = Path(__file__).with_name("resolve-folder.py")
-    cmd = [sys.executable, str(script), "--type", args.type, "--workspace", args.workspace, "--issue", args.issue]
+    cmd = [sys.executable, str(script), "--type", args.type]
     if args.root_folder_id:
         cmd.extend(["--root-folder-id", args.root_folder_id])
     result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
@@ -42,8 +72,6 @@ def locate_existing(folder_id: str, filename: str) -> dict | None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--type", required=True, choices=TYPES)
-    parser.add_argument("--workspace", required=True)
-    parser.add_argument("--issue", required=True)
     parser.add_argument("--file", required=True)
     parser.add_argument("--root-folder-id", default="", help="Upstream override; otherwise use platform config default")
     parser.add_argument("--reference", help="JSON file containing previous file_id/file_guid/internal_link")
@@ -78,11 +106,13 @@ def main() -> int:
     internal_link = first_value(linked, "url", "internalLink", "internal_link")
     if not internal_link:
         raise RuntimeError(f"file-internal-link returned no url: {linked}")
+    link_base = resolve_link_base()
+    internal_link = apply_link_base(str(internal_link), link_base)
     operation = "UPDATE" if existing else "UPLOAD"
     prefix = f"artifact_{args.type.replace('-', '_')}"
     root_folder_id = folder["root_folder_id"]
     metadata = {f"{prefix}_internal_link": internal_link, f"{prefix}_file_id": file_id or file_guid, "artifact_root_folder_id": root_folder_id}
-    result = {"status": "PASS", "operation": operation, "artifact_type": args.type, "file_name": local_file.name, "internal_link": internal_link, "file_id": file_id, "file_guid": file_guid, "folder_id": folder["folder_id"], "root_folder_id": root_folder_id, "metadata_patch": metadata, "comment": f"{operation} {args.type} artifact {local_file.name}: {internal_link}"}
+    result = {"status": "PASS", "operation": operation, "artifact_type": args.type, "file_name": local_file.name, "internal_link": internal_link, "internal_link_base_url": link_base, "file_id": file_id, "file_guid": file_guid, "folder_id": folder["folder_id"], "root_folder_id": root_folder_id, "metadata_patch": metadata, "comment": f"{operation} {args.type} artifact {local_file.name}: {internal_link}"}
     emit(result)
     return 0
 

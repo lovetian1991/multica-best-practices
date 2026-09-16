@@ -26,7 +26,7 @@ metadata:
 
 ```bash
 python "$MULTICA_SKILLS_ROOT/multica-platform-opencontent/scripts/publish-artifact.py" \
-  --type requirement --workspace <WORKSPACE_SLUG> --issue <ISSUE-KEY> \
+  --type requirement \
   --file docs/requirements/<ISSUE-KEY>/prd-<功能名称>.md --json
 ```
 

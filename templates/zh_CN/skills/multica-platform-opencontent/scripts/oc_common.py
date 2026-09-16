@@ -9,6 +9,21 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import yaml
+
+
+def load_config() -> dict:
+    path = Path(__file__).resolve().parent.parent / "config.yaml"
+    return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+
+
+def resolve_env(value: object) -> str:
+    """Resolve ${NAME} placeholders used for runtime-injected configuration."""
+    text = str(value or "").strip()
+    if text.startswith("${") and text.endswith("}"):
+        return os.environ.get(text[2:-1], "").strip()
+    return text
+
 
 def cli_command() -> list[str]:
     bundled_cli = Path(__file__).resolve().parent.parent / "cli" / "bin" / "oc.js"

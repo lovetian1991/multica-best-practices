@@ -27,13 +27,15 @@ description: 通过本 Skill 内置的 oc.js 管理 Multica 协作产物的目�
 
 ```bash
 python scripts/publish-artifact.py \
-  --type requirement --workspace <workspace-slug> --issue <ISSUE-KEY> \
+  --type requirement \
   --file docs/requirements/<ISSUE-KEY>/prd-login.md --json
 ```
 
-脚本按 `<root>/<workspace>/<issue>/<artifact-type>` 建立目录。固定文件名首次使用 `fileModel=UPLOAD`；若 Issue metadata 已有文件引用，或目标目录中同名文件只有一个，自动使用 `fileModel=UPDATE strategy=majorUpgrade`。同名候选超过一个时返回 `BLOCKED`，不自动选择。
+脚本按 `<root>/<artifact-type>` 建立目录。根目录已经是当前 Issue 的目录（`MULTICA_KB_FOLDER_ID` 取自 `issue.kb_folder_id`），不再创建 workspace 和 Issue 中间层。固定文件名首次使用 `fileModel=UPLOAD`；若 Issue metadata 已有文件引用，或目标目录中同名文件只有一个，自动使用 `fileModel=UPDATE strategy=majorUpgrade`。同名候选超过一个时返回 `BLOCKED`，不自动选择。
 
 发布后脚本会调用 `file-internal-link`，输出真实 `internal_link`、`file_id`、`file_guid`、`folder_id`、metadata patch 和 comment 文本。上游必须把 metadata patch 和 comment 写入 Multica Issue；写入失败时阶段不得报告 PASS。
+
+预览链接的 origin 默认由 `oc.js` 用 `MULTICA_SERVER_URL` 拼出，而那个地址是 Multica 的 API 门面，不是 KB 平台地址。配置 `internal_link_base_url`（或环境变量 `OPENCONTENT_WEB_URL`）后，`publish-artifact.py` 会把链接改写为该地址，路径、查询参数和 `#/preview?fileid=` 片段原样保留；输出中的 `internal_link_base_url` 即本次实际生效的基址，为空表示未改写。该值应与 Multica 系统设置里的 KB 环境地址一致。
 
 ## 读取流程
 

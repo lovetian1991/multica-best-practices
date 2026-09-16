@@ -10,7 +10,7 @@ PRD 文件编排 Skill：调用 `multica-platform-opencontent` 上传或更新�
 
 ```bash
 python "$MULTICA_SKILLS_ROOT/multica-platform-opencontent/scripts/publish-artifact.py" \
-  --type requirement --workspace <WORKSPACE_SLUG> --issue <ISSUE-KEY> \
+  --type requirement \
   --file docs/requirements/<ISSUE-KEY>/prd-login.md \
   --root-folder-id <ROOT_FOLDER_ID> --json
 ```

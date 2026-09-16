@@ -12,7 +12,7 @@ API 契约至少包含端点、请求/响应 schema、错误码、鉴权、状�
 
 ```bash
 python "$MULTICA_SKILLS_ROOT/multica-platform-opencontent/scripts/publish-artifact.py" \
-  --type api --workspace <WORKSPACE_SLUG> --issue <ISSUE-KEY> \
+  --type api \
   --file docs/api/<ISSUE-KEY>/api-contract.md --root-folder-id <ROOT_FOLDER_ID> --json
 ```
 

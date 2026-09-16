@@ -1,28 +1,25 @@
 #!/usr/bin/env python3
-"""Resolve and create the stable OpenContent folder for one artifact."""
+"""Resolve and create the stable OpenContent folder for one artifact.
+
+The runtime root is already scoped to one issue (MULTICA_KB_FOLDER_ID comes from
+issue.kb_folder_id), so artifacts live directly under it as
+<root>/<artifact-type>.
+"""
 from __future__ import annotations
 
 import argparse
 import os
-from pathlib import Path
 import sys
 
-import yaml
-
-from oc_common import command_help, emit, first_value, items, run_oc
-
-
-def load_config() -> dict:
-    path = Path(__file__).resolve().parent.parent / "config.yaml"
-    return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-
-
-def resolve_env(value: object) -> str:
-    """Resolve ${NAME} placeholders used for runtime-injected configuration."""
-    text = str(value or "").strip()
-    if text.startswith("${") and text.endswith("}"):
-        return os.environ.get(text[2:-1], "").strip()
-    return text
+from oc_common import (
+    command_help,
+    emit,
+    first_value,
+    items,
+    load_config,
+    resolve_env,
+    run_oc,
+)
 
 
 def folder_name(data: dict, expected: str) -> str | None:
@@ -49,8 +46,6 @@ def ensure_child(parent: str, name: str) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--type", required=True, choices=["requirement", "design", "api", "test-cases", "test-reports", "cicd"])
-    parser.add_argument("--workspace", required=True)
-    parser.add_argument("--issue", required=True)
     parser.add_argument("--root-folder-id", default="")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
@@ -70,11 +65,9 @@ def main() -> int:
         raise RuntimeError("root folder is not in opencontent.allowed_root_folder_ids")
     command_help("folder-info")
     run_oc("folder-info", {"folderId": root_folder_id})
-    workspace = ensure_child(root_folder_id, args.workspace)
-    issue = ensure_child(workspace, args.issue)
     artifact_name = (cfg.get("folders") or {}).get(args.type, args.type)
-    artifact = ensure_child(issue, artifact_name)
-    emit({"root_folder_id": root_folder_id, "workspace_folder_id": workspace, "issue_folder_id": issue, "folder_id": artifact, "artifact_type": args.type})
+    artifact = ensure_child(root_folder_id, artifact_name)
+    emit({"root_folder_id": root_folder_id, "folder_id": artifact, "artifact_type": args.type})
     return 0
 
 

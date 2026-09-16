@@ -20,7 +20,7 @@ metadata:
 
 ```bash
 python "$MULTICA_SKILLS_ROOT/multica-platform-opencontent/scripts/publish-artifact.py" \
-  --type design --workspace <WORKSPACE_SLUG> --issue <ISSUE-KEY> \
+  --type design \
   --file docs/design/<ISSUE-KEY>/design.md --root-folder-id <ROOT_FOLDER_ID> --json
 ```
 

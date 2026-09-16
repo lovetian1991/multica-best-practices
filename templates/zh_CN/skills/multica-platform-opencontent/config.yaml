@@ -5,8 +5,12 @@ opencontent:
   artifact_root_folder_id: "${MULTICA_KB_FOLDER_ID}"
   allowed_root_folder_ids:
     - "${MULTICA_KB_FOLDER_ID}"
-  workspace_folder_pattern: "{workspace}"
-  issue_folder_pattern: "{issue}"
+  # Preview link origin. oc.js builds the link from MULTICA_SERVER_URL, which is
+  # the Multica API facade rather than the KB UI address, so the browser-facing
+  # address is configured here. Set it to the KB 环境地址 from system settings.
+  # Empty means the link keeps whatever oc.js returned.
+  internal_link_base_url: "${OPENCONTENT_WEB_URL}"
+  # Artifacts live directly under the runtime root, which is already issue-scoped.
   folders:
     requirement: "requirements"
     design: "design"

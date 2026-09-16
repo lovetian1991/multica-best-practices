@@ -35,12 +35,12 @@ def run_python(script: Path, args: list[str]) -> tuple[int, str]:
     return proc.returncode, output
 
 
-def publish_evidence(issue: str, workspace: str, root_folder: str, artifact_file: str) -> dict:
-    if not issue or not workspace or not artifact_file:
-        raise ValueError("--issue, --workspace and --artifact-file are required for evidence upload")
+def publish_evidence(root_folder: str, artifact_file: str) -> dict:
+    if not artifact_file:
+        raise ValueError("--artifact-file is required for evidence upload")
     platform = resolve_skill_dir("multica-platform-opencontent", SKILL_DIR)
     script = platform / "scripts" / "publish-artifact.py"
-    args = [str(script), "--type", "cicd", "--workspace", workspace, "--issue", issue, "--file", artifact_file, "--json"]
+    args = [str(script), "--type", "cicd", "--file", artifact_file, "--json"]
     if root_folder:
         args.extend(["--root-folder-id", root_folder])
     proc = subprocess.run([sys.executable, *args], capture_output=True, text=True, encoding="utf-8", errors="replace")
@@ -76,7 +76,6 @@ def main() -> int:
     parser.add_argument("--job-path", default="")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--artifact-file", default="", help="Optional CI evidence file to upload as a cicd artifact")
-    parser.add_argument("--workspace", default="", help="Workspace slug for --artifact-file")
     parser.add_argument("--root-folder-id", default="", help="OpenContent root override for --artifact-file")
     args = parser.parse_args()
 
@@ -158,7 +157,7 @@ def main() -> int:
             print("WARN: skip evidence upload because CI trigger failed", file=sys.stderr)
         else:
             try:
-                payload["artifact"] = publish_evidence(args.issue, args.workspace, args.root_folder_id, args.artifact_file)
+                payload["artifact"] = publish_evidence(args.root_folder_id, args.artifact_file)
             except (OSError, ValueError, RuntimeError, json.JSONDecodeError) as exc:
                 print(f"ERROR: CI passed but evidence upload is BLOCKED: {exc}", file=sys.stderr)
                 rc = 2

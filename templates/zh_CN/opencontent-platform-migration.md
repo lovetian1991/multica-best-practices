@@ -53,19 +53,19 @@ OpenContent 平台层
 
 ## OpenContent 目录和文件约定
 
-OpenContent 的命令使用 `folderId`，不是本地路径。建议在企业库中预先指定一个根文件夹，并按工作区和 Issue 建立目录：
+OpenContent 的命令使用 `folderId`，不是本地路径。根文件夹由当前 Issue 指定，产物类型目录直接建在它下面：
 
 ```text
 <artifact-root-folder>
-└── <workspace-slug>
-    └── <issue-key>
-        ├── requirements
-        ├── design
-        ├── api
-        ├── test-cases
-        ├── test-reports
-        └── cicd
+├── requirements
+├── design
+├── api
+├── test-cases
+├── test-reports
+└── cicd
 ```
+
+根文件夹本身就是 Issue 作用域（Multica 注入的 `MULTICA_KB_FOLDER_ID` 取自 `issue.kb_folder_id`），因此不再建 workspace 和 issue 中间层。
 
 建议把根目录 ID 和各类子目录名放在新平台 Skill 的 `config.yaml`：
 
@@ -235,7 +235,7 @@ templates/zh_CN/skills/multica-platform-opencontent/
 该 Skill 只编排 `oc-basic` 已声明的命令，不直接复制 OpenContent REST 调用。它应定义统一输入输出，例如：
 
 ```text
-publish-artifact --type requirement --workspace <slug> --issue <key> --file <local-file>
+publish-artifact --type requirement --file <local-file>
 update-artifact --type requirement --file-id <id-or-internal-link> --file <local-file> --strategy majorUpgrade
 fetch-artifact --internal-link <opencontent-internal-link> --output <local-dir>
 ```

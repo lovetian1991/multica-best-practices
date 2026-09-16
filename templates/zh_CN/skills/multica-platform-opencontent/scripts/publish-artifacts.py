@@ -12,8 +12,6 @@ import sys
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--type", required=True, choices=["requirement", "design", "api", "test-cases", "test-reports", "cicd"])
-    parser.add_argument("--workspace", required=True)
-    parser.add_argument("--issue", required=True)
     parser.add_argument("--file", action="append", required=True)
     parser.add_argument("--root-folder-id", default="")
     parser.add_argument("--json", action="store_true")
@@ -21,7 +19,7 @@ def main() -> int:
     script = Path(__file__).with_name("publish-artifact.py")
     results: list[dict] = []
     for file_path in args.file:
-        command = [sys.executable, str(script), "--type", args.type, "--workspace", args.workspace, "--issue", args.issue, "--file", file_path, "--json"]
+        command = [sys.executable, str(script), "--type", args.type, "--file", file_path, "--json"]
         if args.root_folder_id:
             command.extend(["--root-folder-id", args.root_folder_id])
         process = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace")
